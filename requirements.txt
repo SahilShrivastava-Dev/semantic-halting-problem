@@ -3,3 +3,10 @@ langchain
 langchain-core
 langchain-openai
 numpy
+ragas
+datasets
+langchain-openai
+langchain-huggingface
+sentence-transformers
+scikit-learn
+pandas

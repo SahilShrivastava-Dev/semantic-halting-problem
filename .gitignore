@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Environment Variables (CRITICAL to ignore to protect API keys)
+.env
+.env.local
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store

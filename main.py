@@ -1,3 +1,11 @@
+"""
+main.py
+
+This module serves as the entry point for the Semantic Halting Problem (SHP) exoskeleton.
+It builds and executes a LangGraph StateGraph comprising a Writer agent, a Critic agent, 
+and a Semantic Entropy convergence checker to prevent infinite loops (deadlocks) in 
+multi-agent workflows.
+"""
 import os
 from typing import TypedDict, List, Dict, Any
 from langgraph.graph import StateGraph, END
@@ -6,6 +14,16 @@ from agents import writer_node, critic_node
 
 # Define the State for LangGraph
 class WorkflowState(TypedDict):
+    """
+    Represents the shared state of the LangGraph multi-agent workflow.
+    
+    Attributes:
+        current_draft (str): The latest text output from the writer agent.
+        history (List[Dict[str, str]]): A log of previous drafts and critic feedback.
+        loop_count (int): Counter for the number of writer-critic iterations.
+        previous_embedding (List[float]): The high-dimensional vector representation of the previous draft.
+        current_embedding (List[float]): The high-dimensional vector representation of the current draft.
+    """
     current_draft: str
     history: List[Dict[str, str]]
     loop_count: int
@@ -16,7 +34,20 @@ class WorkflowState(TypedDict):
 # NOTE: We use a Mock embedding model here so you don't need an API key to run the exoskeleton.
 # In production, use: calculator = SemanticEntropyCalculator()
 class MockEmbeddings:
+    """
+    A lightweight, deterministic mock embedding class for testing the system 
+    without making live network calls to an embedding API provider.
+    """
     def embed_query(self, text: str) -> List[float]:
+        """
+        Hashes the input text and scales it to simulate a 10-dimensional embedding vector.
+        
+        Args:
+            text (str): The text to embed.
+            
+        Returns:
+            List[float]: A pseudo-random (but deterministic) vector representation.
+        """
         # Simple hash-based mock embedding for demonstration
         import hashlib
         h = hashlib.md5(text.encode()).digest()
@@ -27,7 +58,16 @@ CONVERGENCE_THRESHOLD = 0.01
 
 def embed_state_node(state):
     """
-    Calculates the embedding of the current draft and updates the state.
+    LangGraph Node: Calculates the embedding of the current draft and updates the state.
+    
+    This node extracts the latest draft from the state, runs it through the 
+    SemanticEntropyCalculator, and promotes the old current_embedding to previous_embedding.
+    
+    Args:
+        state (dict): The current workflow state.
+        
+    Returns:
+        dict: A state update containing the new current_embedding and previous_embedding.
     """
     draft = state.get("current_draft", "")
     current_emb = calculator.get_embedding(draft)
@@ -41,8 +81,17 @@ def embed_state_node(state):
 
 def check_convergence(state) -> str:
     """
-    The Conditional Edge function.
-    Applies the Banach Fixed-Point logic to determine if the graph should halt.
+    LangGraph Conditional Edge: Applies the Banach Fixed-Point Theorem logic.
+    
+    This function compares the semantic distance (cosine distance) between the 
+    current draft's embedding and the previous draft's embedding. If the distance 
+    falls below CONVERGENCE_THRESHOLD, it halts the graph to prevent deadlock.
+    
+    Args:
+        state (dict): The current workflow state containing the embeddings.
+        
+    Returns:
+        str: The name of the next node to route to ("critic" or "end").
     """
     prev_emb = state.get("previous_embedding")
     curr_emb = state.get("current_embedding")

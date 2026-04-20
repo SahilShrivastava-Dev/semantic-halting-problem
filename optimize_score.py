@@ -1,8 +1,25 @@
+"""
+optimize_score.py
+
+This module contains a machine learning script that uses Linear Regression to 
+optimize the weights of a custom composite 'Information Score'. It models the 
+relationship between base Ragas metrics and holistic human quality scores.
+"""
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 def optimize_information_score_weights():
+    """
+    Simulates a dataset of RAG interactions and uses Linear Regression 
+    to derive the optimal weights for a custom 'Information Score'.
+    
+    This function generates mock Ragas evaluation scores (Faithfulness, 
+    Answer Relevancy, Context Precision, Context Recall) alongside a 
+    'Ground Truth Quality' score. It then fits a linear model to find 
+    the mathematically optimal coefficients (weights) that maximize 
+    alignment with human preference.
+    """
     print("--- Information Score Optimizer ---")
     print("Generating mock dataset of 100 RAG interactions...\n")
     

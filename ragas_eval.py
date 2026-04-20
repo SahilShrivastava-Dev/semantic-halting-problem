@@ -1,3 +1,10 @@
+"""
+ragas_eval.py
+
+This script evaluates Retrieval-Augmented Generation (RAG) pipelines using the 
+Ragas v0.4 framework. It calculates metrics such as Faithfulness, Answer Relevancy, 
+Context Precision, and Context Recall using open-source models hosted on Hugging Face.
+"""
 import os
 from ragas import evaluate
 from ragas.metrics import Faithfulness, AnswerRelevancy, ContextPrecision, ContextRecall
@@ -9,9 +16,9 @@ load_dotenv()
 from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace, HuggingFaceEmbeddings
 from ragas.llms import LangchainLLMWrapper
 
-# 1. Setup the Judge LLM (We default to Mixtral because it handles JSON formatting well)
+# 1. Setup the Judge LLM (Using Zephyr-7b-beta which natively supports Chat format and is ungated)
 hf_endpoint = HuggingFaceEndpoint(
-    repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1",
+    repo_id="Qwen/Qwen2.5-7B-Instruct",
     task="text-generation",
     max_new_tokens=1024,
     do_sample=False
@@ -52,13 +59,8 @@ result = evaluate(
     llm=ragas_llm,
     embeddings=ragas_emb
 )
-print(result)
-print(type(result))
-# 5. Output the results
 print("\n--- Ragas Evaluation Scores ---")
-# result is a dictionary-like object with scores from 0.0 (worst) to 1.0 (best)
-for metric_name, score in dict(result).items():
-    print(f"{metric_name.replace('_', ' ').title()}: {score:.4f}")
+print(result)
     
 # You can also convert the detailed row-by-row results to a Pandas DataFrame
 df = result.to_pandas()

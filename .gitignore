@@ -21,3 +21,13 @@ ENV/
 
 # Local Model Weights Cache
 .hf_cache/
+
+
+# Data and Output files
+*.json
+*.csv
+*.txt
+
+# Exceptions (keep essential project files)
+!test_scenarios.json
+!requirements.txt

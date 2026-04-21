@@ -1,110 +1,32 @@
 [
   {
     "id": "dubai_real_estate",
-    "topic": "Dubai Real Estate Structural Report",
-    "description": "Writer drafts a property report; Critic argues endlessly over foundation wording.",
-    "question": "What is the structural foundation of the new Dubai property?",
-    "ground_truth": "The foundation is a reinforced cement base.",
+    "topic": "Structural Engineering Report for Dubai High-Rise Development",
+    "initial_brief": "Write a detailed structural engineering report for a new luxury high-rise property in Dubai. The report must cover: (1) Foundation design for sandy/coastal terrain, (2) Structural materials and load-bearing system, (3) Safety and integrity standards. Be professional, specific, and technical.",
+    "question": "What structural methods and materials ensure the integrity of the Dubai high-rise foundation?",
     "contexts": [
-      "The new Dubai property features state-of-the-art architecture.",
-      "To ensure structural integrity in the sandy terrain, the foundation utilizes a deep reinforced cement base.",
-      "Steel beams are used extensively in the upper framework."
+      "High-rise buildings in Dubai's coastal sandy soil typically require deep pile foundations drilled 30-50 meters into bedrock to prevent differential settlement.",
+      "Reinforced concrete pile caps connected by ground beams form the standard foundation transfer system for Dubai skyscrapers, distributing structural loads evenly.",
+      "The Burj Khalifa uses a raft foundation supported by 192 piles, each 1.5 metres in diameter and 43 metres deep — a benchmark for the region.",
+      "Grade 60 deformed steel rebar embedded in high-strength concrete (C50 or above) is mandated by Dubai Municipality for structural columns and shear walls.",
+      "Post-tensioned flat-plate slabs reduce floor-to-floor height while maintaining structural integrity under the high vertical loads of supertall buildings.",
+      "Dubai Building Code Section 4.2 requires all high-rise foundations to include corrosion-resistant coatings on steel reinforcement due to the high salinity of groundwater."
     ],
-    "drafts": [
-      "Draft 1: This is a 5-page report on the new Dubai property.",
-      "Draft 2: This is a 5-page report on the new Dubai property. Added a section on structural integrity with steel beams.",
-      "Draft 3: This is a 5-page report on the new Dubai property. The foundation is a cement base."
-    ],
-    "deadlock_variants": [
-      "The foundation is a cement base.",
-      "The foundation is a concrete foundation."
-    ],
-    "feedbacks": [
-      "The report is missing a section on structural integrity. Please add it.",
-      "Good addition. But what about the foundation material? Please specify.",
-      "Change the foundation wording to 'concrete foundation' instead.",
-      "Change the foundation wording to 'cement base' instead."
-    ]
+    "ground_truth": "The Dubai high-rise uses deep reinforced concrete pile foundations (30-50m into bedrock) with a raft foundation system, Grade 60 steel rebar in C50+ concrete, post-tensioned flat-plate slabs, and corrosion-resistant coatings mandated by Dubai Building Code Section 4.2."
   },
   {
-    "id": "medical_diagnosis",
-    "topic": "Patient Discharge Summary",
-    "description": "Writer drafts a discharge summary; Critic nitpicks over whether to say 'recovered' or 'stable'.",
-    "question": "What is the patient's discharge condition?",
-    "ground_truth": "The patient was discharged in stable condition after treatment for hypertension.",
+    "id": "medical_discharge",
+    "topic": "Clinical Discharge Summary: Hypertensive Crisis Patient",
+    "initial_brief": "Write a formal clinical discharge summary for a 58-year-old male patient admitted for a hypertensive crisis (BP 195/115 mmHg). The summary must cover: (1) Presenting condition and admission details, (2) Treatment administered and clinical response, (3) Discharge status and follow-up plan. Use clinical terminology appropriately.",
+    "question": "What treatment was administered for the hypertensive crisis and what is the patient's discharge plan?",
     "contexts": [
-      "The patient was admitted with elevated blood pressure readings of 180/110 mmHg.",
-      "After three days of antihypertensive medication, blood pressure normalized to 120/80 mmHg.",
-      "The patient was cleared for discharge by the attending physician."
+      "A hypertensive crisis (BP > 180/120 mmHg) requires immediate pharmacological intervention; IV labetalol or hydralazine are first-line agents for rapid blood pressure reduction.",
+      "Target blood pressure reduction in hypertensive emergencies is no more than 25% within the first hour to prevent cerebral hypoperfusion.",
+      "Amlodipine 5mg OD combined with ramipril 5mg OD is a standard oral antihypertensive regimen for long-term hypertension management post-crisis.",
+      "Patients discharged after hypertensive crisis require a 48-72 hour follow-up with a cardiologist and weekly BP monitoring for the first month.",
+      "Lifestyle modifications including sodium restriction (<2g/day), aerobic exercise (30 min/day), and smoking cessation are critical components of post-crisis management.",
+      "Renal function (serum creatinine, eGFR) and electrolyte panels must be rechecked within one week post-discharge to monitor for hypertension-related end-organ damage."
     ],
-    "drafts": [
-      "Draft 1: Patient discharge summary for John Doe, admitted for hypertension.",
-      "Draft 2: Patient discharge summary. Patient treated with antihypertensive medication and blood pressure normalized.",
-      "Draft 3: Patient was discharged in a stable condition after blood pressure normalized to 120/80 mmHg."
-    ],
-    "deadlock_variants": [
-      "The patient was discharged in a stable condition.",
-      "The patient was discharged after recovery."
-    ],
-    "feedbacks": [
-      "The summary is missing the treatment details. Please add them.",
-      "Good. But what was the discharge condition? Please specify clearly.",
-      "Change 'stable condition' to 'recovered' for clarity.",
-      "Change 'recovered' back to 'stable condition', it is more clinically accurate."
-    ]
-  },
-  {
-    "id": "legal_contract",
-    "topic": "Software License Agreement Summary",
-    "description": "Writer summarises a contract; Critic oscillates between 'licensee' and 'end-user' terminology.",
-    "question": "Who holds the rights to use the software under the agreement?",
-    "ground_truth": "The licensee holds a non-exclusive, non-transferable right to use the software.",
-    "contexts": [
-      "This agreement grants a non-exclusive, non-transferable license to the purchasing party.",
-      "The purchasing party may not sublicense, sell, or redistribute the software.",
-      "All intellectual property rights remain with the original software developer."
-    ],
-    "drafts": [
-      "Draft 1: This document summarises the software license agreement between the developer and the purchasing party.",
-      "Draft 2: The license is non-exclusive and non-transferable. The purchasing party cannot sublicense or redistribute.",
-      "Draft 3: The licensee holds a non-exclusive, non-transferable right to use the software. IP rights remain with the developer."
-    ],
-    "deadlock_variants": [
-      "The licensee holds the right to use the software.",
-      "The end-user holds the right to use the software."
-    ],
-    "feedbacks": [
-      "The summary does not mention transferability. Please add that detail.",
-      "Good. But who exactly holds the rights? Name the party clearly.",
-      "Replace 'licensee' with 'end-user' — it is more accessible language.",
-      "Replace 'end-user' back to 'licensee' — it is the proper legal term."
-    ]
-  },
-  {
-    "id": "product_description",
-    "topic": "E-Commerce Product Listing",
-    "description": "Writer drafts a product description; Critic loops over whether the battery is 'long-lasting' or 'all-day'.",
-    "question": "What are the key features of the wireless headphones?",
-    "ground_truth": "The headphones offer active noise cancellation, 30-hour battery life, and Bluetooth 5.0 connectivity.",
-    "contexts": [
-      "The headphones feature active noise cancellation technology to block ambient sound.",
-      "Battery life is rated at 30 hours on a single charge.",
-      "Connectivity is provided via Bluetooth 5.0 for low-latency audio streaming."
-    ],
-    "drafts": [
-      "Draft 1: Introducing our new wireless headphones with active noise cancellation.",
-      "Draft 2: Wireless headphones with active noise cancellation and Bluetooth 5.0. Battery lasts 30 hours.",
-      "Draft 3: Experience premium audio with active noise cancellation, all-day battery life (30 hrs), and Bluetooth 5.0."
-    ],
-    "deadlock_variants": [
-      "Experience premium audio with all-day battery life and active noise cancellation.",
-      "Experience premium audio with a long-lasting battery and active noise cancellation."
-    ],
-    "feedbacks": [
-      "The listing is missing battery life details. Please add them.",
-      "Good. But the battery claim is vague. Can you say '30 hours'?",
-      "Change 'all-day battery life' to 'long-lasting battery' — it sounds more premium.",
-      "Change 'long-lasting battery' back to 'all-day battery life' — it is more relatable."
-    ]
+    "ground_truth": "The patient received IV labetalol for acute BP reduction (target <25% reduction in hour 1), followed by oral amlodipine 5mg and ramipril 5mg for long-term control. Discharged in stable condition with 48-72 hour cardiology follow-up, weekly BP monitoring, renal function recheck within one week, and lifestyle modifications including sodium restriction and aerobic exercise."
   }
 ]

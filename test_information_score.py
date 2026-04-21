@@ -208,9 +208,21 @@ if __name__ == "__main__":
     df = pd.DataFrame(all_rows)
     pivot = df.pivot_table(
         index="Scenario", columns="Quality", values="Information Score"
-    )[["good", "convergent", "poor"]]
-    pivot["good>convergent"] = pivot["good"] > pivot["convergent"]
-    pivot["convergent>poor"] = pivot["convergent"] > pivot["poor"]
+    )
+    
+    # Only select columns that actually exist (in case of timeouts)
+    available_cols = [c for c in ["good", "convergent", "poor"] if c in pivot.columns]
+    pivot = pivot[available_cols]
+    
+    if "good" in pivot.columns and "convergent" in pivot.columns:
+        pivot["good>convergent"] = pivot["good"] > pivot["convergent"]
+    else:
+        pivot["good>convergent"] = False
+        
+    if "convergent" in pivot.columns and "poor" in pivot.columns:
+        pivot["convergent>poor"] = pivot["convergent"] > pivot["poor"]
+    else:
+        pivot["convergent>poor"] = False
 
     print(f"\n\n{'═'*65}")
     print("📊 VALIDATION SUMMARY — Information Score by Quality Level")

@@ -1,32 +1,80 @@
 [
   {
     "id": "dubai_real_estate",
+    "split": "train",
     "topic": "Structural Engineering Report for Dubai High-Rise Development",
-    "initial_brief": "Write a detailed structural engineering report for a new luxury high-rise property in Dubai. The report must cover: (1) Foundation design for sandy/coastal terrain, (2) Structural materials and load-bearing system, (3) Safety and integrity standards. Be professional, specific, and technical.",
     "question": "What structural methods and materials ensure the integrity of the Dubai high-rise foundation?",
     "contexts": [
       "High-rise buildings in Dubai's coastal sandy soil typically require deep pile foundations drilled 30-50 meters into bedrock to prevent differential settlement.",
-      "Reinforced concrete pile caps connected by ground beams form the standard foundation transfer system for Dubai skyscrapers, distributing structural loads evenly.",
-      "The Burj Khalifa uses a raft foundation supported by 192 piles, each 1.5 metres in diameter and 43 metres deep — a benchmark for the region.",
-      "Grade 60 deformed steel rebar embedded in high-strength concrete (C50 or above) is mandated by Dubai Municipality for structural columns and shear walls.",
-      "Post-tensioned flat-plate slabs reduce floor-to-floor height while maintaining structural integrity under the high vertical loads of supertall buildings.",
-      "Dubai Building Code Section 4.2 requires all high-rise foundations to include corrosion-resistant coatings on steel reinforcement due to the high salinity of groundwater."
+      "Reinforced concrete pile caps connected by ground beams form the standard foundation transfer system for Dubai skyscrapers.",
+      "Grade 60 deformed steel rebar embedded in high-strength concrete (C50 or above) is mandated by Dubai Municipality.",
+      "Dubai Building Code Section 4.2 requires corrosion-resistant coatings on steel reinforcement due to high groundwater salinity."
     ],
-    "ground_truth": "The Dubai high-rise uses deep reinforced concrete pile foundations (30-50m into bedrock) with a raft foundation system, Grade 60 steel rebar in C50+ concrete, post-tensioned flat-plate slabs, and corrosion-resistant coatings mandated by Dubai Building Code Section 4.2."
+    "ground_truth": "The Dubai high-rise uses deep reinforced concrete pile foundations (30-50m into bedrock) with Grade 60 steel rebar in C50+ concrete and corrosion-resistant coatings per Dubai Building Code Section 4.2."
   },
   {
     "id": "medical_discharge",
+    "split": "train",
     "topic": "Clinical Discharge Summary: Hypertensive Crisis Patient",
-    "initial_brief": "Write a formal clinical discharge summary for a 58-year-old male patient admitted for a hypertensive crisis (BP 195/115 mmHg). The summary must cover: (1) Presenting condition and admission details, (2) Treatment administered and clinical response, (3) Discharge status and follow-up plan. Use clinical terminology appropriately.",
     "question": "What treatment was administered for the hypertensive crisis and what is the patient's discharge plan?",
     "contexts": [
-      "A hypertensive crisis (BP > 180/120 mmHg) requires immediate pharmacological intervention; IV labetalol or hydralazine are first-line agents for rapid blood pressure reduction.",
+      "A hypertensive crisis (BP > 180/120 mmHg) requires immediate IV labetalol or hydralazine for rapid blood pressure reduction.",
       "Target blood pressure reduction in hypertensive emergencies is no more than 25% within the first hour to prevent cerebral hypoperfusion.",
-      "Amlodipine 5mg OD combined with ramipril 5mg OD is a standard oral antihypertensive regimen for long-term hypertension management post-crisis.",
-      "Patients discharged after hypertensive crisis require a 48-72 hour follow-up with a cardiologist and weekly BP monitoring for the first month.",
-      "Lifestyle modifications including sodium restriction (<2g/day), aerobic exercise (30 min/day), and smoking cessation are critical components of post-crisis management.",
-      "Renal function (serum creatinine, eGFR) and electrolyte panels must be rechecked within one week post-discharge to monitor for hypertension-related end-organ damage."
+      "Amlodipine 5mg OD combined with ramipril 5mg OD is a standard oral antihypertensive regimen post-crisis.",
+      "Patients require 48-72 hour cardiology follow-up and weekly BP monitoring for the first month post-discharge."
     ],
-    "ground_truth": "The patient received IV labetalol for acute BP reduction (target <25% reduction in hour 1), followed by oral amlodipine 5mg and ramipril 5mg for long-term control. Discharged in stable condition with 48-72 hour cardiology follow-up, weekly BP monitoring, renal function recheck within one week, and lifestyle modifications including sodium restriction and aerobic exercise."
+    "ground_truth": "IV labetalol was administered for acute BP reduction (target <25% in hour 1), followed by oral amlodipine 5mg and ramipril 5mg. Discharged in stable condition with 48-72 hour cardiology follow-up and weekly BP monitoring."
+  },
+  {
+    "id": "legal_contract",
+    "split": "val",
+    "topic": "Force Majeure Clause Review for International SaaS Agreement",
+    "question": "What events are covered under the Force Majeure clause and what is the notification requirement?",
+    "contexts": [
+      "The Force Majeure clause covers acts of God, war, terrorism, civil unrest, and government-mandated lockdowns.",
+      "Specifically excluded are changes in market conditions, currency fluctuations, and labor disputes involving the party's own employees.",
+      "The affected party must provide written notice to the other party within 48 hours of the occurrence of the Force Majeure event.",
+      "Failure to provide timely notice constitutes a waiver of the right to claim relief under this clause."
+    ],
+    "ground_truth": "The clause covers acts of God, war, terrorism, and government lockdowns, but excludes market changes or local labor disputes. Written notice is required within 48 hours to avoid waiving relief rights."
+  },
+  {
+    "id": "product_description",
+    "split": "val",
+    "topic": "Marketing Copy: Ultra-Lightweight Carbon Fiber Laptop",
+    "question": "What are the key technical specifications and materials used in the 'AeroCarbon 14' laptop?",
+    "contexts": [
+      "The AeroCarbon 14 features a chassis made entirely of aerospace-grade forged carbon fiber, weighing only 880 grams.",
+      "It is powered by an 8-core liquid-cooled processor and features a 14-inch 4K OLED display with 1000 nits peak brightness.",
+      "The battery is a 75Wh high-density lithium-polymer cell providing up to 18 hours of productivity.",
+      "Port selection includes two Thunderbolt 4 ports, a microSD card slot, and a dedicated hardware privacy switch for the webcam."
+    ],
+    "ground_truth": "The AeroCarbon 14 weighs 880g due to its forged carbon fiber chassis. It features an 8-core liquid-cooled CPU, 4K OLED display, and 18-hour battery life with Thunderbolt 4 connectivity."
+  },
+  {
+    "id": "scientific_abstract",
+    "split": "test",
+    "topic": "Research Summary: CRISPR-Cas9 for Duchenne Muscular Dystrophy",
+    "question": "What was the methodology used in the study and what were the primary outcomes for muscle regeneration?",
+    "contexts": [
+      "The study utilized AAV9 vectors to deliver CRISPR-Cas9 components targeting exon 51 of the dystrophin gene in mdx mice models.",
+      "Histological analysis showed a 45% increase in dystrophin-positive fibers 6 weeks post-injection.",
+      "Muscle force measurements demonstrated a 30% improvement in tetanic tension in the tibialis anterior muscle.",
+      "No off-target genomic cleavage was detected using high-throughput sequencing at predicted hotspots."
+    ],
+    "ground_truth": "AAV9 vectors delivered CRISPR targeting exon 51 in mdx mice, resulting in a 45% increase in dystrophin-positive fibers and a 30% improvement in muscle force with no detected off-target effects."
+  },
+  {
+    "id": "historical_audit",
+    "split": "test",
+    "topic": "Historical Fact Check: The Eruption of Mount Vesuvius (79 AD)",
+    "question": "Which Roman cities were affected by the eruption and what were the main geological findings regarding the pyroclastic flows?",
+    "contexts": [
+      "The 79 AD eruption of Mount Vesuvius completely buried the cities of Pompeii, Herculaneum, Oplontis, and Stabiae.",
+      "Geological strata indicate six distinct pyroclastic surges, with temperatures reaching up to 300°C in Herculaneum.",
+      "Pliny the Younger's letters provide the only surviving eyewitness account, describing the umbrella-shaped ash cloud.",
+      "Recent excavations show that most victims died of thermal shock rather than ash suffocation."
+    ],
+    "ground_truth": "Pompeii, Herculaneum, Oplontis, and Stabiae were buried. The eruption featured six pyroclastic surges up to 300°C, with thermal shock being the primary cause of death as documented by Pliny the Younger."
   }
 ]

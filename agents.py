@@ -1,67 +1,57 @@
 """
 agents.py
 
-Defines real LLM-powered Writer and Critic agent nodes for the LangGraph workflow.
+Defines the Writer and Critic LLM-powered agent nodes for the LangGraph workflow.
 
-Both agents use Qwen/Qwen2.5-7B-Instruct via the Hugging Face Inference API
-(no local GPU required). The Writer generates and improves technical drafts;
-the Critic provides specific, actionable editorial feedback until the report
-is either approved or the semantic entropy converges.
+Both agents share a single ChatGroq LLM instance (llama-3.1-8b-instant) loaded
+once at module import time.  The Writer generates and iteratively improves
+technical drafts; the Critic provides ONE specific, actionable critique per
+round — or returns ``APPROVED`` when no substantive gaps remain.
 
-This is the core of the Semantic Halting Problem demonstration: unlike mock
-agents with scripted responses, real LLMs organically exhaust their critique
-vocabulary, causing semantic convergence to emerge naturally.
+Design rationale
+----------------
+Real LLMs are used intentionally: unlike scripted mock agents, a real model
+organically exhausts its critique vocabulary across rounds, causing semantic
+convergence to emerge naturally.  This is the core demonstration of the
+Semantic Halting Problem — the system detects and halts the deadlock
+*before* it is artificially forced to stop.
+
+Retry policy
+------------
+Every LLM call goes through ``_llm_call_with_retry`` which applies
+exponential-backoff on transient API errors (rate-limits, 5xx, etc.).
+The backoff schedule is: 2^attempt seconds (i.e., 2s, 4s, 8s, …).
 """
-import os
-import time
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from dotenv import load_dotenv
+import logging
+import time
+
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_groq import ChatGroq
 
-load_dotenv()
+from config import (
+    AGENT_LLM_MODEL,
+    AGENT_LLM_TEMPERATURE,
+    AGENT_LLM_MAX_TOKENS,
+    MAX_LLM_RETRIES,
+)
 
-MAX_RETRIES = 3
-
-def _llm_call_with_retry(messages: list, context: str = "") -> object:
-    """
-    Calls the LLM with exponential-backoff retry on transient API errors.
-
-    Args:
-        messages (list): List of SystemMessage / HumanMessage objects.
-        context (str):   Label for logging (e.g., 'writer' or 'critic').
-
-    Returns:
-        The LangChain response object.
-    """
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            return llm.invoke(messages)
-        except Exception as e:
-            if attempt == MAX_RETRIES:
-                raise
-            wait = 2 ** attempt
-            print(f"[{context}] API error (attempt {attempt}/{MAX_RETRIES}). "
-                  f"Retrying in {wait}s... ({type(e).__name__}: {str(e)[:80]}")
-            time.sleep(wait)
+logger = logging.getLogger(__name__)
 
 # ─────────────────────────────────────────────────────────────
-# LLM Initialisation (shared by both agents, loaded once)
-# Using Groq's free tier: fast inference, no per-credit quota.
+# LLM — loaded once at module import, shared by both agent nodes.
 # ─────────────────────────────────────────────────────────────
-print("[Agents] Initialising Groq llama-3.1-8b-instant for Writer and Critic...")
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    temperature=0,
-    max_tokens=700,
+logger.info("Initialising Groq %s for Writer and Critic agents...", AGENT_LLM_MODEL)
+_llm = ChatGroq(
+    model=AGENT_LLM_MODEL,
+    temperature=AGENT_LLM_TEMPERATURE,
+    max_tokens=AGENT_LLM_MAX_TOKENS,
 )
 
 # ─────────────────────────────────────────────────────────────
-# System Prompts
+# System prompts
 # ─────────────────────────────────────────────────────────────
-WRITER_SYSTEM = """\
+_WRITER_SYSTEM = """\
 You are a professional technical report writer. Your sole job is to write and
 iteratively improve a detailed, factual report.
 
@@ -72,7 +62,7 @@ Rules:
 - Output ONLY the report text. Do not include preambles like "Here is the report:".
 """
 
-CRITIC_SYSTEM = """\
+_CRITIC_SYSTEM = """\
 You are a strict, detail-oriented technical editor. Your job is to review a
 report and provide ONE specific, actionable critique.
 
@@ -89,24 +79,67 @@ Rules:
 
 
 # ─────────────────────────────────────────────────────────────
-# Agent Nodes
+# Internal helper
+# ─────────────────────────────────────────────────────────────
+def _llm_call_with_retry(messages: list, context: str = "") -> object:
+    """
+    Invoke the shared LLM with exponential-backoff retry on transient errors.
+
+    Args:
+        messages (list): Ordered list of ``SystemMessage`` / ``HumanMessage``
+            objects to send to the model.
+        context (str): Human-readable label (e.g. ``"Writer"`` or ``"Critic"``)
+            used in log messages to aid debugging.
+
+    Returns:
+        The Langchain response object (has a ``.content`` attribute).
+
+    Raises:
+        Exception: Re-raises the last exception after ``MAX_LLM_RETRIES``
+            consecutive failures.
+    """
+    for attempt in range(1, MAX_LLM_RETRIES + 1):
+        try:
+            return _llm.invoke(messages)
+        except Exception as exc:  # noqa: BLE001
+            if attempt == MAX_LLM_RETRIES:
+                logger.error(
+                    "[%s] LLM call failed after %d attempts. Last error: %s",
+                    context, MAX_LLM_RETRIES, exc,
+                )
+                raise
+            wait: int = 2 ** attempt
+            logger.warning(
+                "[%s] API error on attempt %d/%d (%s: %s). Retrying in %ds...",
+                context, attempt, MAX_LLM_RETRIES,
+                type(exc).__name__, str(exc)[:120], wait,
+            )
+            time.sleep(wait)
+
+
+# ─────────────────────────────────────────────────────────────
+# LangGraph agent nodes
 # ─────────────────────────────────────────────────────────────
 def writer_node(state: dict) -> dict:
     """
-    The Writer agent. Calls Qwen2.5-7B-Instruct to generate or improve a
-    technical draft based on the scenario brief and the critic's last feedback.
+    Writer agent — generates or revises a technical report draft.
 
-    On loop 0: generates an initial draft from the scenario brief.
-    On subsequent loops: rewrites the draft to address the critic's feedback.
+    On round 0 (``loop_count == 0``): produces the initial draft from the
+    scenario topic and brief.
+
+    On subsequent rounds: incorporates the Critic's last feedback, producing
+    a revised draft that directly addresses the critique.
 
     Args:
         state (dict): LangGraph workflow state containing:
-            - scenario (dict): The active test scenario with topic and brief.
-            - history (list):  Previous (draft, feedback) pairs.
-            - loop_count (int): Current iteration number.
+            - ``scenario`` (dict): Active scenario with ``topic`` and
+              ``initial_brief`` keys.
+            - ``history`` (list[dict]): All previous ``{draft, feedback}``
+              pairs; last entry is the Critic's most recent feedback.
+            - ``loop_count`` (int): Zero-indexed current iteration count.
 
     Returns:
-        dict: State update with 'current_draft' set to the new draft text.
+        dict: Partial state update ``{"current_draft": <new_draft_text>}``.
     """
     scenario   = state.get("scenario", {})
     loop_count = state.get("loop_count", 0)
@@ -129,37 +162,38 @@ def writer_node(state: dict) -> dict:
             "Rewrite and improve the report, fully addressing the feedback above."
         )
 
-    response = _llm_call_with_retry([
-        SystemMessage(content=WRITER_SYSTEM),
-        HumanMessage(content=user_content)
-    ], context="Writer")
-    draft = response.content.strip()
+    response = _llm_call_with_retry(
+        [SystemMessage(content=_WRITER_SYSTEM), HumanMessage(content=user_content)],
+        context="Writer",
+    )
+    draft: str = response.content.strip()
 
     word_count = len(draft.split())
-    print(f"\n[Writer] Draft {loop_count + 1} generated ({word_count} words)")
-    print(f"         Preview: ...{draft[:120]}...")
+    logger.info("[Writer] Draft %d generated (%d words)", loop_count + 1, word_count)
+    logger.debug("[Writer] Preview: ...%s...", draft[:120])
+
     return {"current_draft": draft}
 
 
 def critic_node(state: dict) -> dict:
     """
-    The Critic agent. Calls Qwen2.5-7B-Instruct to review the current draft
-    and provide ONE specific, substantive critique — or to approve the report
-    if no meaningful improvements remain.
+    Critic agent — reviews the current draft and returns one actionable critique,
+    or ``APPROVED`` when the report is genuinely complete.
 
-    Returning "APPROVED" signals that the LLM itself has detected convergence,
-    independent of the semantic entropy measurement. Both signals are used to
-    halt the loop in agent_workflow.py.
+    Returning ``APPROVED`` triggers the Critic-Approval halt signal in
+    ``agent_workflow.py``, independently of the semantic-entropy halt.
 
     Args:
         state (dict): LangGraph workflow state containing:
-            - scenario (dict):     The active test scenario.
-            - current_draft (str): The latest draft from the Writer.
-            - loop_count (int):    Current iteration number.
-            - history (list):      Previous (draft, feedback) pairs.
+            - ``scenario`` (dict): Active scenario (used for ``topic``).
+            - ``current_draft`` (str): Latest draft from the Writer.
+            - ``loop_count`` (int): Current iteration number (pre-increment).
+            - ``history`` (list[dict]): All previous ``{draft, feedback}`` pairs.
 
     Returns:
-        dict: State update with 'history' appended and 'loop_count' incremented.
+        dict: Partial state update with:
+            - ``history``: Appended with ``{draft, feedback}`` for this round.
+            - ``loop_count``: Incremented by 1.
     """
     scenario   = state.get("scenario", {})
     draft      = state.get("current_draft", "")
@@ -173,15 +207,17 @@ def critic_node(state: dict) -> dict:
         "Provide your editorial review."
     )
 
-    response = _llm_call_with_retry([
-        SystemMessage(content=CRITIC_SYSTEM),
-        HumanMessage(content=user_content)
-    ], context="Critic")
-    feedback = response.content.strip()
+    response = _llm_call_with_retry(
+        [SystemMessage(content=_CRITIC_SYSTEM), HumanMessage(content=user_content)],
+        context="Critic",
+    )
+    feedback: str = response.content.strip()
 
     is_approved = feedback.strip().upper().startswith("APPROVED")
-    status = "✅ APPROVED by Critic LLM" if is_approved else f"Feedback: {feedback[:100]}..."
-    print(f"[Critic] {status}")
+    if is_approved:
+        logger.info("[Critic] APPROVED by Critic LLM after %d round(s).", loop_count + 1)
+    else:
+        logger.info("[Critic] Feedback: %s...", feedback[:100])
 
     history.append({"draft": draft, "feedback": feedback})
     return {

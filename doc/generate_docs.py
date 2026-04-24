@@ -1,47 +1,57 @@
 """
 generate_docs.py
 
-A utility script that auto-generates a rich DOCX documentation file for the
-Semantic Halting Problem (SHP) codebase, written in beginner-friendly language.
-Run this whenever you want to produce or refresh the documentation:
-    python3 doc/generate_docs.py
-"""
-from docx import Document
-from docx.shared import Pt, RGBColor, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
+Auto-generates the SHP_Codebase_Guide.docx documentation for the
+Semantic Halting Problem (SHP) project.
 
-def add_heading(doc, text, level=1):
+Run from the project root:
+    python doc/generate_docs.py
+
+The output file is written to doc/SHP_Codebase_Guide.docx.
+
+Dependencies:
+    pip install python-docx
+"""
+
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Inches, Pt, RGBColor
+
+
+# ─────────────────────────────────────────────────────────────
+# Formatting helpers
+# ─────────────────────────────────────────────────────────────
+def _heading(doc: Document, text: str, level: int = 1):
+    """Add a styled heading at the given outline level."""
     h = doc.add_heading(text, level=level)
     run = h.runs[0]
-    if level == 1:
-        run.font.color.rgb = RGBColor(0x1A, 0x73, 0xE8)
-    elif level == 2:
-        run.font.color.rgb = RGBColor(0x18, 0x45, 0x9B)
-    elif level == 3:
-        run.font.color.rgb = RGBColor(0x2E, 0x7D, 0x32)
+    palette = {1: (0x1A, 0x73, 0xE8), 2: (0x18, 0x45, 0x9B), 3: (0x2E, 0x7D, 0x32)}
+    r, g, b = palette.get(level, (0x33, 0x33, 0x33))
+    run.font.color.rgb = RGBColor(r, g, b)
     return h
 
-def add_code_block(doc, code_text):
-    """Adds a styled mono-spaced code block to the document."""
+
+def _code_block(doc: Document, code: str):
+    """Add a shaded monospace code block paragraph."""
     para = doc.add_paragraph()
     para.paragraph_format.left_indent = Inches(0.3)
-    # Shade background
     pPr = para._p.get_or_add_pPr()
     shd = OxmlElement("w:shd")
     shd.set(qn("w:val"), "clear")
     shd.set(qn("w:color"), "auto")
     shd.set(qn("w:fill"), "F3F4F6")
     pPr.append(shd)
-    run = para.add_run(code_text)
+    run = para.add_run(code)
     run.font.name = "Courier New"
     run.font.size = Pt(9)
     run.font.color.rgb = RGBColor(0xC7, 0x25, 0x4E)
     return para
 
-def add_info_box(doc, label, text):
-    """Adds a 💡 Tip or ℹ️ Note paragraph."""
+
+def _info_box(doc: Document, label: str, text: str):
+    """Add a 💡/ℹ️ callout paragraph."""
     para = doc.add_paragraph()
     para.paragraph_format.left_indent = Inches(0.2)
     r_label = para.add_run(f"{label}  ")
@@ -49,388 +59,258 @@ def add_info_box(doc, label, text):
     r_label.font.color.rgb = RGBColor(0x00, 0x70, 0xC0)
     r_text = para.add_run(text)
     r_text.font.color.rgb = RGBColor(0x44, 0x44, 0x44)
-    return para
 
-def build_doc():
+
+def _table(doc: Document, style: str, headers: list[str], rows: list[tuple]) -> None:
+    """Add a formatted two-column table."""
+    t = doc.add_table(rows=1 + len(rows), cols=len(headers))
+    t.style = style
+    for i, h in enumerate(headers):
+        t.rows[0].cells[i].text = h
+    for row_data in rows:
+        cells = t.add_row().cells
+        for i, val in enumerate(row_data):
+            cells[i].text = val
+
+
+# ─────────────────────────────────────────────────────────────
+# Document builder
+# ─────────────────────────────────────────────────────────────
+def build_doc() -> None:
+    """Construct and save the complete codebase guide document."""
     doc = Document()
 
-    # ────────────────────────────────────────────────
-    # Cover Page
-    # ────────────────────────────────────────────────
+    # ── Cover ────────────────────────────────────────────────────────────────
     title = doc.add_heading("Semantic Halting Problem (SHP)", 0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     title.runs[0].font.color.rgb = RGBColor(0x1A, 0x73, 0xE8)
 
-    sub = doc.add_paragraph("A Beginner's Complete Guide to the Codebase")
+    sub = doc.add_paragraph("Complete Production Codebase Guide")
     sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
     sub.runs[0].bold = True
     sub.runs[0].font.size = Pt(14)
 
     doc.add_paragraph("")
     intro = doc.add_paragraph(
-        "This document walks you through every file, class, and function in the SHP project "
-        "in plain English. No prior experience in AI or machine learning is required. "
-        "By the end, you will understand what the project does, why each file exists, "
-        "and how all the pieces connect together."
+        "This document walks through every file, class, and function in the SHP project "
+        "in plain English.  No prior AI or machine-learning experience is required.  "
+        "By the end you will understand what the project does, why each file exists, "
+        "and how all the pieces connect."
     )
     intro.runs[0].font.size = Pt(11)
+    doc.add_page_break()
+
+    # ── Section 1: What is SHP? ──────────────────────────────────────────────
+    _heading(doc, "1.  What is the Semantic Halting Problem?", level=1)
+    doc.add_paragraph(
+        "Imagine two AI agents — a Writer and a Critic — collaborating on a report.  "
+        "The Writer produces a draft, the Critic reviews it and gives feedback, and the "
+        "Writer revises.  In theory they finish when the report is perfect.  In practice "
+        "a real LLM Critic eventually runs out of substantive critique and starts "
+        "recycling minor wording suggestions — the loop is stuck in a semantic deadlock."
+    )
+    doc.add_paragraph(
+        "The Semantic Halting Problem (SHP) asks: how can the computer detect and halt "
+        "this deadlock automatically, without a hard-coded step limit?  "
+        "This project's answer is mathematical: convert each draft to a vector "
+        "(embedding), measure the cosine distance between consecutive drafts, and stop "
+        "when the distance collapses to near-zero — meaning no new information is being "
+        "generated."
+    )
+    _info_box(doc, "💡 Key Idea:",
+              "Distance ≈ 0 means 'no new information'. That is the halt signal.")
+
+    doc.add_paragraph("")
+    _heading(doc, "2.  Project Architecture at a Glance", level=1)
+    doc.add_paragraph(
+        "The project consists of seven Python files, each with a single, clear "
+        "responsibility:"
+    )
+    _table(doc, "Light List Accent 1",
+           ["File", "Responsibility"],
+           [
+               ("config.py",               "Central constants, file paths, and model identifiers."),
+               ("main.py",                 "Five-phase pipeline orchestrator."),
+               ("agent_workflow.py",       "LangGraph multi-agent graph (Writer→Evaluator→Critic→halt)."),
+               ("agents.py",               "Real LLM-powered Writer and Critic nodes (Groq/llama-3.1-8b)."),
+               ("semantic_entropy.py",     "Cosine-distance convergence engine."),
+               ("ragas_eval.py",           "Post-hoc Ragas evaluation of final agent outputs."),
+               ("optimize_score.py",       "Linear Regression to learn IS metric weights."),
+               ("test_information_score.py","IS formula validation (good > convergent > poor)."),
+               ("doc/generate_docs.py",    "This documentation generator."),
+           ])
+    doc.add_page_break()
+
+    # ── Section 3: File-by-File Breakdown ────────────────────────────────────
+    _heading(doc, "3.  File-by-File Breakdown", level=1)
+
+    # config.py
+    _heading(doc, "3.1  config.py  (Central Configuration)", level=2)
+    doc.add_paragraph(
+        "All tunable constants live here: model names, halting thresholds, file paths, "
+        "and default weights.  Every other module imports from config.py, so changing "
+        "a constant once propagates everywhere."
+    )
+    _code_block(doc,
+        "# Key constants:\n"
+        "CONVERGENCE_THRESHOLD = 0.06   # cosine distance below which we halt\n"
+        "MAX_ROUNDS            = 12     # hard failsafe cap\n"
+        "AGENT_LLM_MODEL       = 'llama-3.1-8b-instant'  # Groq model\n"
+        "EMBEDDING_MODEL_NAME  = 'BAAI/bge-small-en-v1.5'"
+    )
+
+    # semantic_entropy.py
+    _heading(doc, "3.2  semantic_entropy.py  (Math Engine)", level=2)
+    doc.add_paragraph(
+        "The mathematical backbone of SHP.  Wraps any Langchain-compatible embedding "
+        "model and exposes two methods:"
+    )
+    _heading(doc, "get_embedding(text) → List[float]", level=3)
+    doc.add_paragraph(
+        "Converts a string to a dense 384-dimensional vector "
+        "(BAAI/bge-small-en-v1.5).  Similar texts produce vectors pointing "
+        "in nearly the same direction."
+    )
+    _heading(doc, "calculate_distance(v1, v2) → float", level=3)
+    doc.add_paragraph(
+        "Computes cosine distance (1 − cosine_similarity).  "
+        "Returns 0.0 for identical texts, 1.0 for orthogonal, up to 2.0 for "
+        "opposite.  Synonym rewrites score ~0.04; the halt threshold is 0.06."
+    )
+    _code_block(doc,
+        "dist = calc.calculate_distance(vec_draft_4, vec_draft_5)\n"
+        "# 0.003 → semantically stuck → HALT\n"
+        "# 0.25  → meaningful revision → CONTINUE"
+    )
+
+    # agents.py
+    _heading(doc, "3.3  agents.py  (LLM-Powered Agents)", level=2)
+    doc.add_paragraph(
+        "Defines the Writer and Critic as real LLM agent nodes powered by "
+        "Groq's llama-3.1-8b-instant (free tier, fast inference).  Both share a "
+        "single ChatGroq instance loaded once at module import."
+    )
+    _heading(doc, "writer_node(state) → dict", level=3)
+    doc.add_paragraph(
+        "On round 0: generates the initial draft from the scenario topic and brief.  "
+        "On subsequent rounds: rewrites the draft to address the Critic's feedback, "
+        "producing a genuinely improved revision rather than a cosmetic paraphrase."
+    )
+    _heading(doc, "critic_node(state) → dict", level=3)
+    doc.add_paragraph(
+        "Reviews the current draft and returns exactly ONE substantive critique.  "
+        "Returns the word APPROVED when no meaningful gaps remain — this triggers "
+        "the Critic Approval halt signal independently of the entropy check."
+    )
+    _info_box(doc, "🔑 Why real LLMs?",
+              "Real models organically exhaust their critique vocabulary across rounds, "
+              "causing semantic convergence to emerge naturally without scripting.")
+
+    # agent_workflow.py
+    _heading(doc, "3.4  agent_workflow.py  (LangGraph Orchestrator)", level=2)
+    doc.add_paragraph(
+        "Assembles the LangGraph StateGraph and executes the per-scenario loop.  "
+        "Contains three node functions and one conditional edge function."
+    )
+    _heading(doc, "Graph topology", level=3)
+    _code_block(doc,
+        "writer → evaluator → embed_state → check_convergence ──► critic ─► (back to writer)\n"
+        "                                                       └──► END"
+    )
+    _heading(doc, "evaluator_node  — real-time IS scoring", level=3)
+    doc.add_paragraph(
+        "Runs Ragas inside the loop after every draft.  Applies learned IS weights "
+        "to produce a per-round Information Score so the gain can be tracked in real time."
+    )
+    _heading(doc, "check_convergence  — the halting oracle", level=3)
+    doc.add_paragraph(
+        "Evaluates four signals in priority order: "
+        "(1) Critic approval, (2) semantic entropy, (3) IS-Gain ≤ 0, (4) failsafe cap.  "
+        "Returns 'end' on the first triggered signal."
+    )
+
+    # ragas_eval.py
+    _heading(doc, "3.5  ragas_eval.py  (Post-Hoc Grader)", level=2)
+    doc.add_paragraph(
+        "After agent_workflow.py saves agent_results.json, ragas_eval.py "
+        "re-evaluates every final draft with the full Ragas suite and saves "
+        "ragas_scores.json for optimize_score.py."
+    )
+    _heading(doc, "The Four Metrics", level=3)
+    _table(doc, "Light List Accent 2",
+           ["Metric", "Plain English Meaning"],
+           [
+               ("Faithfulness",      "Did the answer hallucinate? Every claim must be supported by contexts."),
+               ("Answer Relevancy",  "Does the answer actually address the question asked?"),
+               ("Context Precision", "Of the retrieved contexts, what fraction was useful?"),
+               ("Context Recall",    "Did the contexts cover everything needed to answer correctly?"),
+           ])
+
+    # optimize_score.py
+    _heading(doc, "3.6  optimize_score.py  (IS Weight Optimizer)", level=2)
+    doc.add_paragraph(
+        "Fits scikit-learn LinearRegression(fit_intercept=False) to learn the "
+        "weights w₁…w₄ that make IS the best single predictor of overall quality.  "
+        "Coefficients are clipped to ≥ 0 and normalised to sum to 1."
+    )
+    _code_block(doc,
+        "IS = 0.39·Faithfulness + 0.30·AnswerRelevancy\n"
+        "   + 0.09·ContextPrecision + 0.23·ContextRecall\n\n"
+        "R² = 0.81  ← strong fit (explains 81% of quality variance)"
+    )
+    _info_box(doc, "💡 Note:",
+              "In production, replace the equal-weight proxy with real human annotations "
+              "to obtain domain-specific weights.")
+
+    # test_information_score.py
+    _heading(doc, "3.7  test_information_score.py  (IS Validation)", level=2)
+    doc.add_paragraph(
+        "Validates the IS formula by scoring three quality tiers for each scenario "
+        "and asserting IS(good) > IS(convergent) > IS(poor).  This confirms the "
+        "formula discriminates between meaningful progress and deadlock output."
+    )
 
     doc.add_page_break()
 
-    # ────────────────────────────────────────────────
-    # Section 1 – What is SHP?
-    # ────────────────────────────────────────────────
-    add_heading(doc, "1.  What is the Semantic Halting Problem?", level=1)
-    doc.add_paragraph(
-        "Imagine you hire two people to write a report: a Writer and a Critic. "
-        "The Writer writes a draft, the Critic reads it and gives feedback, and the Writer "
-        "revises — over and over. In a perfect world they'd finish the report and stop. "
-        "But what if the Critic keeps asking for tiny, unimportant changes forever? "
-        "They never stop. They are stuck in an infinite loop."
-    )
-    doc.add_paragraph(
-        "The Semantic Halting Problem (SHP) asks: how can a computer know when to stop this loop? "
-        "The answer this project uses is maths. We convert each draft into a list of numbers "
-        "(called an embedding), then measure the distance between drafts. "
-        "When consecutive drafts are no longer meaningfully different, we force a stop."
-    )
-    add_info_box(doc, "💡 Key Idea:", "Distance ≈ 0 means 'no new information is being added'. That is our signal to stop.")
-
-    doc.add_paragraph("")
-    add_heading(doc, "2.  Project Architecture at a Glance", level=1)
-    doc.add_paragraph(
-        "The project is made up of five Python files, each with a clear, single responsibility:"
-    )
-    rows = [
-        ("main.py", "The master switch. Run this file to trigger the complete pipeline."),
-        ("agent_workflow.py", "Builds and runs the LangGraph multi-agent loop (Writer → Critic → halt)."),
-        ("agents.py", "Defines the mock Writer and Critic agent logic."),
-        ("semantic_entropy.py", "The maths engine. Converts text to vectors and measures their distance."),
-        ("ragas_eval.py", "Grades the final draft using four standard RAG quality metrics via Hugging Face."),
-        ("optimize_score.py", "Uses ML to find the best way to combine the four grades into one final score."),
-    ]
-    table = doc.add_table(rows=1 + len(rows), cols=2)
-    table.style = "Light List Accent 1"
-    hdr = table.rows[0].cells
-    hdr[0].text = "File"
-    hdr[1].text = "What it does"
-    for file_name, description in rows:
-        row_cells = table.add_row().cells
-        row_cells[0].text = file_name
-        row_cells[1].text = description
-
-    doc.add_page_break()
-
-    # ────────────────────────────────────────────────
-    # Section 3 – File-by-File Breakdown
-    # ────────────────────────────────────────────────
-    add_heading(doc, "3.  File-by-File Breakdown", level=1)
-
-    # ── 3.1 main.py ──────────────────────────────────
-    add_heading(doc, "3.1  main.py  (The Orchestrator)", level=2)
-    doc.add_paragraph(
-        "This file is the single entry-point for the entire project. "
-        "Instead of running three separate commands, running main.py executes all three scripts "
-        "one after another in the correct order."
-    )
-    add_heading(doc, "How it works", level=3)
-    doc.add_paragraph(
-        "It uses Python's built-in subprocess module to launch each script as a separate process, "
-        "exactly like you would from the terminal. If any step fails, the pipeline prints an error and stops immediately."
-    )
-    add_heading(doc, "Key function: run_script(script_name, step_description)", level=3)
-    doc.add_paragraph(
-        "Accepts the filename of a script and a human-readable label. "
-        "It prints a colourful header, then executes the script using the same Python interpreter "
-        "that is running inside your virtual environment."
-    )
-    add_code_block(doc,
-        "# How to run the full pipeline:\n"
-        "python3 main.py\n\n"
-        "# What happens internally:\n"
-        "# 1. Runs agent_workflow.py\n"
-        "# 2. Runs ragas_eval.py\n"
-        "# 3. Runs optimize_score.py"
-    )
-
-    doc.add_paragraph("")
-
-    # ── 3.2 agents.py ────────────────────────────────
-    add_heading(doc, "3.2  agents.py  (The Mock Agents)", level=2)
-    doc.add_paragraph(
-        "This file contains two functions, one for the Writer and one for the Critic. "
-        "Both are 'mock' agents, meaning they do not actually call an AI model — "
-        "they use hard-coded responses so that you can test the loop without spending money on APIs."
-    )
-
-    add_heading(doc, "Function: writer_node(state)", level=3)
-    doc.add_paragraph(
-        "The Writer agent. It reads loop_count from the shared state "
-        "(how many rounds have happened) and returns a progressively improved draft. "
-        "After Draft 3, it starts switching between two slightly different wordings to simulate a deadlock."
-    )
-    add_code_block(doc,
-        "# Input:  state = {'loop_count': 0, 'history': []}\n"
-        "# Output: {'current_draft': 'Draft 1: This is a 5-page report...'}\n\n"
-        "def writer_node(state):\n"
-        "    loop_count = state.get('loop_count', 0)\n"
-        "    if loop_count == 0:\n"
-        "        draft = 'Draft 1: This is a 5-page report on the new Dubai property.'\n"
-        "    # ... continues for subsequent drafts\n"
-        "    return {'current_draft': draft}"
-    )
-
-    add_heading(doc, "Function: critic_node(state)", level=3)
-    doc.add_paragraph(
-        "The Critic agent. It reads the current draft and loop_count from state, "
-        "then returns targeted feedback. After loop 1, it enters a loop of pedantic demands "
-        "('change cement to concrete', 'change concrete to cement', forever) "
-        "to simulate the infinite-loop problem that SHP is designed to solve."
-    )
-    add_code_block(doc,
-        "# Input:  state = {'current_draft': 'Draft 2: ...', 'loop_count': 1}\n"
-        "# Output: {'history': [...], 'loop_count': 2}\n\n"
-        "def critic_node(state):\n"
-        "    feedback = 'Good addition. But what about the foundation material?'\n"
-        "    history.append({'draft': draft, 'feedback': feedback})\n"
-        "    return {'history': history, 'loop_count': loop_count + 1}"
-    )
-
-    doc.add_paragraph("")
-
-    # ── 3.3 semantic_entropy.py ───────────────────────
-    add_heading(doc, "3.3  semantic_entropy.py  (The Maths Engine)", level=2)
-    doc.add_paragraph(
-        "This is the most important file conceptually. It does not call any agent; "
-        "its only job is to measure how different two texts are."
-    )
-    add_info_box(doc, "🔑 Core Concept:",
-        "Every piece of text can be converted into a list of floating-point numbers (a vector). "
-        "Similar texts produce vectors that point in nearly the same direction. "
-        "We measure the angle between two vectors — the smaller the angle, the more similar the texts.")
-
-    add_heading(doc, "Class: SemanticEntropyCalculator", level=3)
-    doc.add_paragraph(
-        "A wrapper class that glues an embedding model to our convergence logic. "
-        "You create one instance of this class and keep reusing it throughout the workflow."
-    )
-    add_code_block(doc,
-        "# Initialise once:\n"
-        "calculator = SemanticEntropyCalculator(embedding_model=MockEmbeddings())\n\n"
-        "# Attributes:\n"
-        "#   embedding_model  — any Langchain-compatible embeddings object"
-    )
-
-    add_heading(doc, "Method: get_embedding(text) → List[float]", level=3)
-    doc.add_paragraph(
-        "Takes a plain-English string (e.g., a draft) and returns a list of decimal numbers "
-        "that represent its meaning in high-dimensional space. "
-        "In production this calls a real embedding API; in tests it calls the MockEmbeddings class."
-    )
-    add_code_block(doc,
-        "vec = calculator.get_embedding('The foundation is a cement base.')\n"
-        "# Returns something like: [0.12, 0.88, 0.34, ...]"
-    )
-
-    add_heading(doc, "Method: calculate_distance(vec1, vec2) → float", level=3)
-    doc.add_paragraph(
-        "Computes the cosine distance between two vectors. "
-        "Returns a float between 0.0 (identical) and 2.0 (completely opposite). "
-        "In practice, a halting threshold of 0.01 works well — anything below that means "
-        "the two drafts are practically the same text."
-    )
-    add_code_block(doc,
-        "dist = calculator.calculate_distance(vec_draft_4, vec_draft_5)\n"
-        "# Output: 0.004  ← almost zero = semantically stuck → HALT\n"
-        "# Output: 0.31   ← meaningful change = keep going"
-    )
-
-    doc.add_paragraph("")
-
-    # ── 3.4 agent_workflow.py ─────────────────────────
-    add_heading(doc, "3.4  agent_workflow.py  (The Graph / Flowchart)", level=2)
-    doc.add_paragraph(
-        "This file wires everything together using LangGraph, a library that lets you define "
-        "workflows as directed graphs (think: a flowchart with nodes and arrows). "
-        "Each box in the flowchart is a 'node', and each arrow is an 'edge'."
-    )
-
-    add_heading(doc, "Class: WorkflowState (TypedDict)", level=3)
-    doc.add_paragraph(
-        "Defines the shape of the shared memory that all nodes read from and write to. "
-        "Think of it as the whiteboard that every agent in the room can see. "
-        "Every time a node runs, it can update entries on this whiteboard."
-    )
-    add_code_block(doc,
-        "class WorkflowState(TypedDict):\n"
-        "    current_draft: str          # The latest draft text\n"
-        "    history: List[Dict]         # Log of all previous rounds\n"
-        "    loop_count: int             # How many rounds have happened\n"
-        "    previous_embedding: List    # Vector of the PREVIOUS draft\n"
-        "    current_embedding: List     # Vector of the CURRENT draft"
-    )
-
-    add_heading(doc, "Class: MockEmbeddings", level=3)
-    doc.add_paragraph(
-        "A lightweight fake embedding model for development and testing. "
-        "Instead of sending text to an API, it hashes the text using MD5 and converts the "
-        "bytes to floats. This is deterministic (same text always gives same result) "
-        "and requires zero network access."
-    )
-
-    add_heading(doc, "Function: embed_state_node(state)", level=3)
-    doc.add_paragraph(
-        "A LangGraph node that sits between the Writer and the decision point. "
-        "It reads the latest draft, converts it to a vector, "
-        "and stores it alongside the previous draft's vector so the convergence check can compare them."
-    )
-    add_code_block(doc,
-        "# Before node runs: state has only current_draft\n"
-        "# After node runs:  state gains previous_embedding + current_embedding"
-    )
-
-    add_heading(doc, "Function: check_convergence(state) → str", level=3)
-    doc.add_paragraph(
-        "This is the 'brain' of the halting mechanism — a conditional edge. "
-        "LangGraph calls this function after embed_state_node and uses the return value "
-        "to decide which node to run next."
-    )
-    add_code_block(doc,
-        "# Returns 'critic'  → the loop continues\n"
-        "# Returns 'end'     → the graph stops (halted!)\n\n"
-        "if distance < CONVERGENCE_THRESHOLD:   # e.g. 0.01\n"
-        "    return 'end'\n"
-        "elif loop_count > 10:                  # failsafe\n"
-        "    return 'end'\n"
-        "else:\n"
-        "    return 'critic'"
-    )
-
-    doc.add_paragraph("")
-    add_heading(doc, "The Graph Topology (Flowchart)", level=3)
-    doc.add_paragraph(
-        "writer  →  embed_state  →  check_convergence  →  critic  →  (back to writer)\n"
-        "                                              ↓\n"
-        "                                             END"
-    )
-
-    doc.add_paragraph("")
-
-    # ── 3.5 ragas_eval.py ────────────────────────────
-    add_heading(doc, "3.5  ragas_eval.py  (The Grader)", level=2)
-    doc.add_paragraph(
-        "Once the agents produce a final output, we need an objective way to measure its quality. "
-        "This script uses the Ragas framework with free Hugging Face models to score it across "
-        "four dimensions."
-    )
-
-    add_heading(doc, "The Four Metrics Explained Simply", level=3)
-    metric_rows = [
-        ("Faithfulness", "Did the answer make up facts, or is everything supported by the context? (1.0 = zero hallucinations)"),
-        ("Answer Relevancy", "Does the answer actually address the question that was asked?"),
-        ("Context Precision", "Of all the documents retrieved, how many were actually useful?"),
-        ("Context Recall", "Did we retrieve ALL the documents needed to answer the question correctly?"),
-    ]
-    t = doc.add_table(rows=1 + len(metric_rows), cols=2)
-    t.style = "Light List Accent 2"
-    t.rows[0].cells[0].text = "Metric"
-    t.rows[0].cells[1].text = "Plain English Meaning"
-    for m, d in metric_rows:
-        r = t.add_row().cells
-        r[0].text = m
-        r[1].text = d
-
-    add_heading(doc, "Model Setup", level=3)
-    doc.add_paragraph(
-        "Two free, open-source Hugging Face models are used, requiring NO payment:"
-    )
-    doc.add_paragraph("• Judge LLM: Qwen/Qwen2.5-7B-Instruct — evaluates faithfulness and relevancy via Hugging Face's Inference API (no local download).", style="List Bullet")
-    doc.add_paragraph("• Embedding Model: BAAI/bge-small-en-v1.5 — a 130 MB model downloaded once to your local .hf_cache folder for relevancy scoring.", style="List Bullet")
-
-    add_code_block(doc,
-        "# Sample output from ragas_eval.py:\n"
-        "{'faithfulness': 1.0000,\n"
-        " 'answer_relevancy': 0.9100,\n"
-        " 'context_precision': 0.5000,\n"
-        " 'context_recall': 1.0000}"
-    )
-
-    doc.add_paragraph("")
-
-    # ── 3.6 optimize_score.py ────────────────────────
-    add_heading(doc, "3.6  optimize_score.py  (The Optimizer)", level=2)
-    doc.add_paragraph(
-        "We now have four scores (Faithfulness, Relevancy, Precision, Recall), but how do we "
-        "combine them into a single 'Information Score'? Should Faithfulness count double? "
-        "This file uses Machine Learning (Linear Regression) to find the mathematically ideal answer."
-    )
-
-    add_heading(doc, "Function: optimize_information_score_weights()", level=3)
-    doc.add_paragraph("This function does the following four things:")
+    # ── Section 4: Pipeline ──────────────────────────────────────────────────
+    _heading(doc, "4.  Running the Full Pipeline", level=1)
     steps = [
-        "Generate 100 fake RAG interactions with random-but-realistic metric scores.",
-        "Create a 'Ground Truth' human quality score using known weights + random noise.",
-        "Feed all of this to a Linear Regression model (sklearn) to learn the weights.",
-        "Print the normalised formula and an R² score (how accurate the model is).",
+        ("Activate venv",              "source venv/bin/activate"),
+        ("Install dependencies",       "pip install -r requirements.txt"),
+        ("Run the full pipeline",      "python main.py"),
+        ("Or run phases individually",
+         "python agent_workflow.py --split train\n"
+         "python ragas_eval.py\n"
+         "python optimize_score.py\n"
+         "python agent_workflow.py --split val\n"
+         "python test_information_score.py"),
     ]
-    for i, step in enumerate(steps, 1):
-        doc.add_paragraph(f"{i}. {step}", style="List Number")
-
-    add_heading(doc, "Understanding the output", level=3)
-    add_code_block(doc,
-        "Information Score =\n"
-        "  (0.39 * Faithfulness) +\n"
-        "  (0.30 * AnswerRelevancy) +\n"
-        "  (0.09 * ContextPrecision) +\n"
-        "  (0.23 * ContextRecall)\n\n"
-        "Model R² Score: 0.8068\n"
-        "# R² of 0.81 means the formula explains 81% of the variance in human ratings.\n"
-        "# The closer to 1.0, the more the formula aligns with human judgement."
-    )
-    add_info_box(doc, "💡 Note:",
-        "In production you would replace the mock data with real human annotations "
-        "collected from your own RAG system to get weights tailored to your domain.")
-
-    doc.add_page_break()
-
-    # ────────────────────────────────────────────────
-    # Section 4 – How to Run the Pipeline
-    # ────────────────────────────────────────────────
-    add_heading(doc, "4.  How to Run the Full Pipeline", level=1)
-    steps_run = [
-        ("Activate the virtual environment", "source venv/bin/activate"),
-        ("(Optional) Run each step individually", "python3 agent_workflow.py\npython3 ragas_eval.py\npython3 optimize_score.py"),
-        ("Run the full automated pipeline", "python3 main.py"),
-    ]
-    for label, cmd in steps_run:
+    for label, cmd in steps:
         doc.add_paragraph(label, style="List Number")
-        add_code_block(doc, cmd)
+        _code_block(doc, cmd)
 
     doc.add_paragraph("")
-    add_heading(doc, "5.  Glossary", level=1)
-    glossary = [
-        ("Embedding", "A list of numbers that captures the meaning of a piece of text so a computer can compare texts mathematically."),
-        ("Cosine Distance", "A way to measure the angle between two embedding vectors. Zero = identical meaning, larger = more different."),
-        ("LangGraph", "A Python library for building AI agent workflows as directed graphs (flowcharts)."),
-        ("Ragas", "An open-source framework for evaluating the quality of RAG (Retrieval-Augmented Generation) systems."),
-        ("Linear Regression", "A basic machine-learning algorithm that learns a straight-line formula to predict an output from multiple inputs."),
-        ("R² Score", "A number between 0 and 1 that measures how well a regression model's predictions match reality. 1.0 = perfect."),
-        ("Convergence", "The point where the text drafts stop changing meaningfully — the mathematical signal to halt the loop."),
-        ("Virtual Environment (venv)", "An isolated Python installation for this project so that its dependencies don't clash with other projects."),
-    ]
-    t2 = doc.add_table(rows=1 + len(glossary), cols=2)
-    t2.style = "Light List Accent 1"
-    t2.rows[0].cells[0].text = "Term"
-    t2.rows[0].cells[1].text = "Meaning"
-    for term, meaning in glossary:
-        r = t2.add_row().cells
-        r[0].text = term
-        r[1].text = meaning
+    _heading(doc, "5.  Glossary", level=1)
+    _table(doc, "Light List Accent 1",
+           ["Term", "Meaning"],
+           [
+               ("Embedding",          "A list of numbers capturing the meaning of text so distances can be computed."),
+               ("Cosine Distance",    "Angle-based similarity measure between two vectors (0=identical, 1=orthogonal)."),
+               ("LangGraph",          "Python library for building AI agent workflows as directed graphs."),
+               ("Ragas",              "Open-source framework for evaluating RAG (Retrieval-Augmented Generation) quality."),
+               ("Information Score",  "Weighted composite of the four Ragas metrics; the primary halting signal."),
+               ("Linear Regression",  "ML algorithm that learns a linear formula to predict an output from inputs."),
+               ("R² Score",           "Goodness-of-fit measure (0–1). Higher = formula explains more quality variance."),
+               ("Convergence",        "The point where drafts stop changing semantically — the halt trigger."),
+               ("Groq",               "Cloud inference API providing free, fast LLaMA-3 inference without a local GPU."),
+               ("venv",               "Isolated Python environment for this project's dependencies."),
+           ])
 
-    # ── Save ──────────────────────────────────────────
+    # ── Save ─────────────────────────────────────────────────────────────────
     out_path = "doc/SHP_Codebase_Guide.docx"
     doc.save(out_path)
-    print(f"✅  Documentation saved to: {out_path}")
+    print(f"✅  Documentation saved → {out_path}")
+
 
 if __name__ == "__main__":
     build_doc()

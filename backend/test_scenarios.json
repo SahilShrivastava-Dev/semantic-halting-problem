@@ -1,0 +1,242 @@
+[
+  {
+    "id": "arjun_where_live",
+    "topic_id": "arjun_life",
+    "split": "train",
+    "topic": "Arjun's Life",
+    "question": "Where does Arjun currently live?",
+    "contexts": [
+      "Arjun Sharma is a 28-year-old software engineer who moved to Bangalore in 2021.",
+      "He lives in the Koramangala neighbourhood of Bangalore, Karnataka.",
+      "Arjun previously lived in Jaipur, Rajasthan, where he grew up.",
+      "He works at a tech startup in the Indiranagar area of Bangalore.",
+      "Arjun has a golden retriever named Mango and enjoys playing badminton on weekends."
+    ],
+    "ground_truth": "Arjun currently lives in Koramangala, Bangalore, Karnataka."
+  },
+  {
+    "id": "arjun_job",
+    "topic_id": "arjun_life",
+    "split": "train",
+    "topic": "Arjun's Life",
+    "question": "What does Arjun do for a living and where does he work?",
+    "contexts": [
+      "Arjun Sharma is a 28-year-old software engineer who moved to Bangalore in 2021.",
+      "He lives in the Koramangala neighbourhood of Bangalore, Karnataka.",
+      "Arjun previously lived in Jaipur, Rajasthan, where he grew up.",
+      "He works at a tech startup in the Indiranagar area of Bangalore.",
+      "Arjun has a golden retriever named Mango and enjoys playing badminton on weekends."
+    ],
+    "ground_truth": "Arjun is a software engineer who works at a tech startup in Indiranagar, Bangalore."
+  },
+  {
+    "id": "arjun_when_moved",
+    "topic_id": "arjun_life",
+    "split": "train",
+    "topic": "Arjun's Life",
+    "question": "When did Arjun move to Bangalore and where did he live before?",
+    "contexts": [
+      "Arjun Sharma is a 28-year-old software engineer who moved to Bangalore in 2021.",
+      "He lives in the Koramangala neighbourhood of Bangalore, Karnataka.",
+      "Arjun previously lived in Jaipur, Rajasthan, where he grew up.",
+      "He works at a tech startup in the Indiranagar area of Bangalore.",
+      "Arjun has a golden retriever named Mango and enjoys playing badminton on weekends."
+    ],
+    "ground_truth": "Arjun moved to Bangalore in 2021. Before that, he lived in Jaipur, Rajasthan."
+  },
+  {
+    "id": "arjun_hobby",
+    "topic_id": "arjun_life",
+    "split": "train",
+    "topic": "Arjun's Life",
+    "question": "What is Arjun's hobby and does he have any pets?",
+    "contexts": [
+      "Arjun Sharma is a 28-year-old software engineer who moved to Bangalore in 2021.",
+      "He lives in the Koramangala neighbourhood of Bangalore, Karnataka.",
+      "Arjun previously lived in Jaipur, Rajasthan, where he grew up.",
+      "He works at a tech startup in the Indiranagar area of Bangalore.",
+      "Arjun has a golden retriever named Mango and enjoys playing badminton on weekends."
+    ],
+    "ground_truth": "Arjun enjoys playing badminton on weekends. He also has a golden retriever named Mango."
+  },
+  {
+    "id": "arjun_age",
+    "topic_id": "arjun_life",
+    "split": "val",
+    "topic": "Arjun's Life",
+    "question": "How old is Arjun and what is his full name?",
+    "contexts": [
+      "Arjun Sharma is a 28-year-old software engineer who moved to Bangalore in 2021.",
+      "He lives in the Koramangala neighbourhood of Bangalore, Karnataka.",
+      "Arjun previously lived in Jaipur, Rajasthan, where he grew up.",
+      "He works at a tech startup in the Indiranagar area of Bangalore.",
+      "Arjun has a golden retriever named Mango and enjoys playing badminton on weekends."
+    ],
+    "ground_truth": "Arjun's full name is Arjun Sharma and he is 28 years old."
+  },
+  {
+    "id": "arjun_hometown",
+    "topic_id": "arjun_life",
+    "split": "val",
+    "topic": "Arjun's Life",
+    "question": "What state is Arjun's hometown in?",
+    "contexts": [
+      "Arjun Sharma is a 28-year-old software engineer who moved to Bangalore in 2021.",
+      "He lives in the Koramangala neighbourhood of Bangalore, Karnataka.",
+      "Arjun previously lived in Jaipur, Rajasthan, where he grew up.",
+      "He works at a tech startup in the Indiranagar area of Bangalore.",
+      "Arjun has a golden retriever named Mango and enjoys playing badminton on weekends."
+    ],
+    "ground_truth": "Arjun's hometown of Jaipur is in Rajasthan."
+  },
+  {
+    "id": "arjun_pet_name",
+    "topic_id": "arjun_life",
+    "split": "test",
+    "topic": "Arjun's Life",
+    "question": "What is the name and breed of Arjun's dog?",
+    "contexts": [
+      "Arjun Sharma is a 28-year-old software engineer who moved to Bangalore in 2021.",
+      "He lives in the Koramangala neighbourhood of Bangalore, Karnataka.",
+      "Arjun previously lived in Jaipur, Rajasthan, where he grew up.",
+      "He works at a tech startup in the Indiranagar area of Bangalore.",
+      "Arjun has a golden retriever named Mango and enjoys playing badminton on weekends."
+    ],
+    "ground_truth": "Arjun's dog is a golden retriever named Mango."
+  },
+  {
+    "id": "arjun_neighbourhood",
+    "topic_id": "arjun_life",
+    "split": "test",
+    "topic": "Arjun's Life",
+    "question": "In which neighbourhood of Bangalore does Arjun live?",
+    "contexts": [
+      "Arjun Sharma is a 28-year-old software engineer who moved to Bangalore in 2021.",
+      "He lives in the Koramangala neighbourhood of Bangalore, Karnataka.",
+      "Arjun previously lived in Jaipur, Rajasthan, where he grew up.",
+      "He works at a tech startup in the Indiranagar area of Bangalore.",
+      "Arjun has a golden retriever named Mango and enjoys playing badminton on weekends."
+    ],
+    "ground_truth": "Arjun lives in the Koramangala neighbourhood of Bangalore."
+  },
+  {
+    "id": "aerobook_weight",
+    "topic_id": "aerobook_laptop",
+    "split": "train",
+    "topic": "The AeroBook Laptop",
+    "question": "How much does the AeroBook Pro weigh?",
+    "contexts": [
+      "The AeroBook Pro is a premium ultrabook launched in March 2024, priced starting at $1,299.",
+      "It weighs only 1.1 kg thanks to its magnesium-alloy chassis, making it one of the lightest laptops in its class.",
+      "The display is a 13.6-inch OLED panel with 2.8K resolution and 120 Hz refresh rate.",
+      "It is powered by an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and 512 GB NVMe SSD.",
+      "The battery capacity is 65 Wh and provides up to 18 hours of battery life on a single charge."
+    ],
+    "ground_truth": "The AeroBook Pro weighs 1.1 kg due to its magnesium-alloy chassis."
+  },
+  {
+    "id": "aerobook_display",
+    "topic_id": "aerobook_laptop",
+    "split": "train",
+    "topic": "The AeroBook Laptop",
+    "question": "What kind of display does the AeroBook Pro have?",
+    "contexts": [
+      "The AeroBook Pro is a premium ultrabook launched in March 2024, priced starting at $1,299.",
+      "It weighs only 1.1 kg thanks to its magnesium-alloy chassis, making it one of the lightest laptops in its class.",
+      "The display is a 13.6-inch OLED panel with 2.8K resolution and 120 Hz refresh rate.",
+      "It is powered by an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and 512 GB NVMe SSD.",
+      "The battery capacity is 65 Wh and provides up to 18 hours of battery life on a single charge."
+    ],
+    "ground_truth": "The AeroBook Pro has a 13.6-inch OLED display with 2.8K resolution and 120 Hz refresh rate."
+  },
+  {
+    "id": "aerobook_battery",
+    "topic_id": "aerobook_laptop",
+    "split": "train",
+    "topic": "The AeroBook Laptop",
+    "question": "What is the battery life and battery capacity of the AeroBook Pro?",
+    "contexts": [
+      "The AeroBook Pro is a premium ultrabook launched in March 2024, priced starting at $1,299.",
+      "It weighs only 1.1 kg thanks to its magnesium-alloy chassis, making it one of the lightest laptops in its class.",
+      "The display is a 13.6-inch OLED panel with 2.8K resolution and 120 Hz refresh rate.",
+      "It is powered by an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and 512 GB NVMe SSD.",
+      "The battery capacity is 65 Wh and provides up to 18 hours of battery life on a single charge."
+    ],
+    "ground_truth": "The AeroBook Pro has a 65 Wh battery that provides up to 18 hours of battery life."
+  },
+  {
+    "id": "aerobook_processor",
+    "topic_id": "aerobook_laptop",
+    "split": "train",
+    "topic": "The AeroBook Laptop",
+    "question": "What processor and RAM does the AeroBook Pro have?",
+    "contexts": [
+      "The AeroBook Pro is a premium ultrabook launched in March 2024, priced starting at $1,299.",
+      "It weighs only 1.1 kg thanks to its magnesium-alloy chassis, making it one of the lightest laptops in its class.",
+      "The display is a 13.6-inch OLED panel with 2.8K resolution and 120 Hz refresh rate.",
+      "It is powered by an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and 512 GB NVMe SSD.",
+      "The battery capacity is 65 Wh and provides up to 18 hours of battery life on a single charge."
+    ],
+    "ground_truth": "The AeroBook Pro uses an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and a 512 GB NVMe SSD."
+  },
+  {
+    "id": "aerobook_price",
+    "topic_id": "aerobook_laptop",
+    "split": "val",
+    "topic": "The AeroBook Laptop",
+    "question": "What is the starting price of the AeroBook Pro?",
+    "contexts": [
+      "The AeroBook Pro is a premium ultrabook launched in March 2024, priced starting at $1,299.",
+      "It weighs only 1.1 kg thanks to its magnesium-alloy chassis, making it one of the lightest laptops in its class.",
+      "The display is a 13.6-inch OLED panel with 2.8K resolution and 120 Hz refresh rate.",
+      "It is powered by an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and 512 GB NVMe SSD.",
+      "The battery capacity is 65 Wh and provides up to 18 hours of battery life on a single charge."
+    ],
+    "ground_truth": "The AeroBook Pro starts at $1,299."
+  },
+  {
+    "id": "aerobook_launch",
+    "topic_id": "aerobook_laptop",
+    "split": "val",
+    "topic": "The AeroBook Laptop",
+    "question": "When was the AeroBook Pro launched?",
+    "contexts": [
+      "The AeroBook Pro is a premium ultrabook launched in March 2024, priced starting at $1,299.",
+      "It weighs only 1.1 kg thanks to its magnesium-alloy chassis, making it one of the lightest laptops in its class.",
+      "The display is a 13.6-inch OLED panel with 2.8K resolution and 120 Hz refresh rate.",
+      "It is powered by an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and 512 GB NVMe SSD.",
+      "The battery capacity is 65 Wh and provides up to 18 hours of battery life on a single charge."
+    ],
+    "ground_truth": "The AeroBook Pro was launched in March 2024."
+  },
+  {
+    "id": "aerobook_storage",
+    "topic_id": "aerobook_laptop",
+    "split": "test",
+    "topic": "The AeroBook Laptop",
+    "question": "What storage does the AeroBook Pro come with?",
+    "contexts": [
+      "The AeroBook Pro is a premium ultrabook launched in March 2024, priced starting at $1,299.",
+      "It weighs only 1.1 kg thanks to its magnesium-alloy chassis, making it one of the lightest laptops in its class.",
+      "The display is a 13.6-inch OLED panel with 2.8K resolution and 120 Hz refresh rate.",
+      "It is powered by an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and 512 GB NVMe SSD.",
+      "The battery capacity is 65 Wh and provides up to 18 hours of battery life on a single charge."
+    ],
+    "ground_truth": "The AeroBook Pro comes with a 512 GB NVMe SSD."
+  },
+  {
+    "id": "aerobook_chassis",
+    "topic_id": "aerobook_laptop",
+    "split": "test",
+    "topic": "The AeroBook Laptop",
+    "question": "What material is the AeroBook Pro chassis made from?",
+    "contexts": [
+      "The AeroBook Pro is a premium ultrabook launched in March 2024, priced starting at $1,299.",
+      "It weighs only 1.1 kg thanks to its magnesium-alloy chassis, making it one of the lightest laptops in its class.",
+      "The display is a 13.6-inch OLED panel with 2.8K resolution and 120 Hz refresh rate.",
+      "It is powered by an Intel Core Ultra 7 processor with 16 GB LPDDR5 RAM and 512 GB NVMe SSD.",
+      "The battery capacity is 65 Wh and provides up to 18 hours of battery life on a single charge."
+    ],
+    "ground_truth": "The AeroBook Pro chassis is made from magnesium alloy."
+  }
+]

@@ -9,7 +9,7 @@ env/
 ENV/
 .venv/
 
-# Environment Variables (CRITICAL to ignore to protect API keys)
+# Environment Variables (CRITICAL — protects API keys)
 .env
 .env.local
 
@@ -22,12 +22,23 @@ ENV/
 # Local Model Weights Cache
 .hf_cache/
 
-
-# Data and Output files
-*.json
-*.csv
-*.txt
+# Backend generated data (runtime outputs)
+backend/*.json
+backend/*.csv
+backend/doc/information_score_test_results.csv
 
 # Exceptions (keep essential project files)
+!backend/test_scenarios.json
+!backend/requirements.txt
+!backend/.env.example
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# Root level legacy outputs
+*.json
+*.csv
 !test_scenarios.json
 !requirements.txt

@@ -1,0 +1,37 @@
+# ─────────────────────────────────────────────────────────────
+# Semantic Halting Problem (SHP) — Backend Dependencies
+# Install: pip install -r requirements.txt
+# Python 3.11+
+# ─────────────────────────────────────────────────────────────
+
+# Web server & WebSocket
+fastapi>=0.111
+uvicorn[standard]>=0.29
+websockets>=12.0
+
+# LangChain ecosystem
+langchain>=0.2
+langchain-core>=0.2
+langchain-groq>=0.1
+langchain-huggingface>=0.0
+langchain-openai>=0.1
+
+# LangGraph — multi-agent state machine
+langgraph>=0.1
+
+# Ragas — RAG quality evaluation framework
+ragas>=0.1
+
+# HuggingFace datasets (required by Ragas Dataset.from_dict)
+datasets>=2.14
+
+# Local sentence embeddings (BAAI/bge-small-en-v1.5)
+sentence-transformers>=2.2
+
+# ML / numerics
+scikit-learn>=1.3
+numpy>=1.26
+pandas>=2.0
+
+# Environment variable management
+python-dotenv>=1.0

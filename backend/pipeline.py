@@ -88,11 +88,12 @@ def main() -> None:
 
     _run_phase(
         [py, "optimize_score.py"],
-        "PHASE 3: IS Weight Optimisation (Linear Regression → optimized_weights.json)",
+        "PHASE 3: IS Weight Optimisation (entropy/AHP/constrained_ls → optimized_weights.json)",
     )
 
     logger.info("═" * 70)
-    logger.info("⚖️  ENTERING VALIDATION PHASE — using learned weights from optimized_weights.json")
+    logger.info("⚖️  ENTERING VALIDATION PHASE — using optimised weights from optimized_weights.json")
+    logger.info("   Strategy: set IS_WEIGHT_STRATEGY in .env or pass --strategy to optimize_score.py")
     logger.info("═" * 70)
 
     _run_phase(

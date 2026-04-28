@@ -118,10 +118,52 @@ METRIC_COLS: list[str] = [
 ]
 
 # ─────────────────────────────────────────────────────────────
-# Regression / weight optimisation
+# IS weight optimisation strategy
 # ─────────────────────────────────────────────────────────────
+# Select via env var IS_WEIGHT_STRATEGY or the --strategy CLI flag on optimize_score.py.
+#
+#   "entropy"        (DEFAULT) — Objective, label-free Shannon entropy weighting.
+#                    Metrics that vary more across scenarios carry more discriminative
+#                    information and receive higher weight. No human labels required.
+#                    Ref: MIGRASCOPE (arXiv:2602.21553); Springer MCDM 2025.
+#
+#   "constrained_ls" — Supervised constrained quadratic optimisation (scipy SLSQP).
+#                    Fits weights against a harmonic-mean quality proxy; enforces
+#                    w_i ≥ 0 and Σw_i = 1 exactly — no post-hoc clip+normalise.
+#                    Falls back to entropy when fewer than MIN_REAL_ROWS rows exist.
+#
+#   "ahp"            — Expert-driven Analytic Hierarchy Process. Derives weights from
+#                    AHP_PAIRWISE_MATRIX via the principal eigenvector; includes
+#                    Saaty's Consistency Ratio check (CR ≤ 0.10 accepted).
+#                    Ref: Mathematics MDPI 2023 (doi:10.3390/math11030627);
+#                         IEEE Xplore 2024 (10.1109/CSEI64419.2024.10649145).
+#
+#   "equal"          — Uniform 0.25 baseline for ablation / cold-start.
+IS_WEIGHT_STRATEGY: str = os.getenv("IS_WEIGHT_STRATEGY", "entropy")
+
+# AHP pairwise comparison matrix
+# Rows / Columns: [faithfulness, answer_relevancy, context_precision, context_recall]
+# Saaty scale: 1=equal, 3=moderate, 5=strong, 7=very strong, 9=extreme advantage
+#
+# Justification (RAG domain knowledge):
+#   Faithfulness (hallucination prevention) is most critical — a factually incorrect
+#   answer is unusable regardless of other scores.  Answer relevancy comes second.
+#   Context recall ensures key information is not omitted.  Context precision has
+#   diminishing benefit when recall is already high.
+#
+# Consistency check (geometric-mean approximation):
+#   λ_max ≈ 4.057  |  CI = (λ_max - n)/(n-1) ≈ 0.019  |  RI(4) = 0.90
+#   CR = CI / RI ≈ 0.021  <  0.10  ✓  (Saaty's threshold)
+AHP_PAIRWISE_MATRIX: list[list[float]] = [
+    #  F      AR     CP     CR
+    [1.000, 2.000, 5.000, 3.000],   # faithfulness
+    [0.500, 1.000, 4.000, 2.000],   # answer_relevancy
+    [0.200, 0.250, 1.000, 0.333],   # context_precision
+    [0.333, 0.500, 3.000, 1.000],   # context_recall
+]
+
+# Minimum real scenario rows before constrained_ls accepts real data
+# (falls back to entropy below this threshold rather than synthetic data)
 MIN_REAL_ROWS_FOR_REGRESSION: int = 2
-SYNTHETIC_FALLBACK_ROWS: int = 100
-SYNTHETIC_TRUE_WEIGHTS: list[float] = [0.4, 0.3, 0.1, 0.2]
 R2_STRONG_FIT: float = 0.75
 R2_MODERATE_FIT: float = 0.50

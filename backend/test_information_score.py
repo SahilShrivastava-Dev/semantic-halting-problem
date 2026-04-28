@@ -54,16 +54,21 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def _load_weights() -> tuple[dict[str, float], str, object]:
+def _load_weights() -> tuple[dict[str, float], str, str, dict]:
     if os.path.exists(WEIGHTS_FILE):
         with open(WEIGHTS_FILE, "r", encoding="utf-8") as fh:
             data = json.load(fh)
-        return data["weights"], data.get("data_source", "unknown"), data.get("r2_score", "N/A")
+        return (
+            data["weights"],
+            data.get("strategy", "unknown"),
+            data.get("data_source", "unknown"),
+            data.get("strategy_meta", {}),
+        )
     logger.warning("%s not found — using equal default weights.", WEIGHTS_FILE)
-    return dict(DEFAULT_IS_WEIGHTS), "default", "N/A"
+    return dict(DEFAULT_IS_WEIGHTS), "equal (default)", "none", {}
 
 
-IS_WEIGHTS, _data_source, _r2 = _load_weights()
+IS_WEIGHTS, _strategy, _data_source, _strategy_meta = _load_weights()
 
 TEST_CASES: dict[str, dict] = {
     "dubai_real_estate": {
@@ -210,7 +215,13 @@ def main(provider: str = DEFAULT_PROVIDER, eval_model: str | None = None) -> Non
     )
 
     logger.info("═" * 65)
-    logger.info("IS VALIDATION  weights=%s", IS_WEIGHTS)
+    logger.info("IS VALIDATION")
+    logger.info("  Strategy :  %s", _strategy)
+    logger.info("  Data src :  %s", _data_source)
+    logger.info("  Weights  :  %s", IS_WEIGHTS)
+    if _strategy_meta:
+        for k, v in _strategy_meta.items():
+            logger.info("  %-10s:  %s", k, v)
     logger.info("═" * 65)
 
     all_rows: list[dict] = []

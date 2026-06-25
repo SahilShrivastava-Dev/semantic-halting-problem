@@ -1,0 +1,939 @@
+{
+  "baseline": "fixed_k6",
+  "policies": {
+    "abl_critic_only": {
+      "n": 60,
+      "mean_rounds": 6.0,
+      "mean_operational_tokens": 11070.1,
+      "mean_final_is": 0.6702,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 6.0,
+          "mean_reference": 6.0,
+          "mean_diff": 0.0,
+          "mean_diff_ci95": [
+            0.0,
+            0.0
+          ],
+          "cohens_dz": 0.0,
+          "t_p_value": null,
+          "wilcoxon_p_value": null
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 11070.15,
+          "mean_reference": 11070.15,
+          "mean_diff": 0.0,
+          "mean_diff_ci95": [
+            0.0,
+            0.0
+          ],
+          "cohens_dz": 0.0,
+          "t_p_value": null,
+          "wilcoxon_p_value": null
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6701900000000001,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": 0.0,
+          "mean_diff_ci95": [
+            0.0,
+            0.0
+          ],
+          "cohens_dz": 0.0,
+          "t_p_value": null,
+          "wilcoxon_p_value": null
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": 0.0,
+          "mean_diff_ci95": [
+            0.0,
+            0.0
+          ],
+          "p_lower": null,
+          "non_inferior": true
+        }
+      }
+    },
+    "abl_entropy_only": {
+      "n": 60,
+      "mean_rounds": 3.917,
+      "mean_operational_tokens": 6862.9,
+      "mean_final_is": 0.6665,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 3.9166666666666665,
+          "mean_reference": 6.0,
+          "mean_diff": -2.0833333333333335,
+          "mean_diff_ci95": [
+            -2.35,
+            -1.7833333333333334
+          ],
+          "cohens_dz": -1.8285954541079301,
+          "t_p_value": 1.2174839705792953e-20,
+          "wilcoxon_p_value": 3.0197069384777844e-10
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 6862.866666666667,
+          "mean_reference": 11070.15,
+          "mean_diff": -4207.283333333334,
+          "mean_diff_ci95": [
+            -4799.984166666667,
+            -3577.2112500000003
+          ],
+          "cohens_dz": -1.7177436270766089,
+          "t_p_value": 2.0508064753745482e-19,
+          "wilcoxon_p_value": 3.552713678800501e-15
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6665199999999999,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.0036699999999999936,
+          "mean_diff_ci95": [
+            -0.033453916666666667,
+            0.025586791666666667
+          ],
+          "cohens_dz": -0.03099975501908247,
+          "t_p_value": 0.811067202840233,
+          "wilcoxon_p_value": 0.9797339246366477
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.0036699999999999936,
+          "mean_diff_ci95": [
+            -0.033453916666666667,
+            0.025586791666666667
+          ],
+          "p_lower": 0.1448349648935492,
+          "non_inferior": false
+        }
+      }
+    },
+    "abl_full": {
+      "n": 60,
+      "mean_rounds": 2.4,
+      "mean_operational_tokens": 25363.2,
+      "mean_final_is": 0.666,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 2.4,
+          "mean_reference": 6.0,
+          "mean_diff": -3.6,
+          "mean_diff_ci95": [
+            -3.7333333333333334,
+            -3.45
+          ],
+          "cohens_dz": -6.446434808413906,
+          "t_p_value": 5.685573663558571e-50,
+          "wilcoxon_p_value": 2.7834412953416525e-12
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 25363.2,
+          "mean_reference": 11070.15,
+          "mean_diff": 14293.05,
+          "mean_diff_ci95": [
+            12776.609583333333,
+            15868.69125
+          ],
+          "cohens_dz": 2.2772163563596513,
+          "t_p_value": 3.344077495096306e-25,
+          "wilcoxon_p_value": 1.629555794311934e-11
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6659533333333332,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.004236666666666663,
+          "mean_diff_ci95": [
+            -0.03383091666666666,
+            0.024993833333333337
+          ],
+          "cohens_dz": -0.03550602299077637,
+          "t_p_value": 0.7842552110247707,
+          "wilcoxon_p_value": 0.5211472485278942
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.004236666666666663,
+          "mean_diff_ci95": [
+            -0.03383091666666666,
+            0.024993833333333337
+          ],
+          "p_lower": 0.1551726304819725,
+          "non_inferior": false
+        }
+      }
+    },
+    "abl_isgain_only": {
+      "n": 60,
+      "mean_rounds": 2.45,
+      "mean_operational_tokens": 25953.3,
+      "mean_final_is": 0.661,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 2.45,
+          "mean_reference": 6.0,
+          "mean_diff": -3.55,
+          "mean_diff_ci95": [
+            -3.7,
+            -3.3666666666666667
+          ],
+          "cohens_dz": -5.2623801003251325,
+          "t_p_value": 6.454802164428333e-45,
+          "wilcoxon_p_value": 2.969858051007262e-12
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 25953.266666666666,
+          "mean_reference": 11070.15,
+          "mean_diff": 14883.116666666667,
+          "mean_diff_ci95": [
+            13089.085416666667,
+            16907.43333333333
+          ],
+          "cohens_dz": 1.9189432119619367,
+          "t_p_value": 1.305806711458565e-21,
+          "wilcoxon_p_value": 1.629555794311934e-11
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6609599999999999,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.009229999999999995,
+          "mean_diff_ci95": [
+            -0.03917770833333332,
+            0.020751874999999996
+          ],
+          "cohens_dz": -0.07768379708452558,
+          "t_p_value": 0.5496551743442779,
+          "wilcoxon_p_value": 0.2665567549297021
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.009229999999999995,
+          "mean_diff_ci95": [
+            -0.03917770833333332,
+            0.020751874999999996
+          ],
+          "p_lower": 0.2426781850758878,
+          "non_inferior": false
+        }
+      }
+    },
+    "abl_no_critic": {
+      "n": 60,
+      "mean_rounds": 2.4,
+      "mean_operational_tokens": 25363.2,
+      "mean_final_is": 0.666,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 2.4,
+          "mean_reference": 6.0,
+          "mean_diff": -3.6,
+          "mean_diff_ci95": [
+            -3.7333333333333334,
+            -3.45
+          ],
+          "cohens_dz": -6.446434808413906,
+          "t_p_value": 5.685573663558571e-50,
+          "wilcoxon_p_value": 2.7834412953416525e-12
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 25363.2,
+          "mean_reference": 11070.15,
+          "mean_diff": 14293.05,
+          "mean_diff_ci95": [
+            12776.609583333333,
+            15868.69125
+          ],
+          "cohens_dz": 2.2772163563596513,
+          "t_p_value": 3.344077495096306e-25,
+          "wilcoxon_p_value": 1.629555794311934e-11
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6659533333333332,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.004236666666666663,
+          "mean_diff_ci95": [
+            -0.03383091666666666,
+            0.024993833333333337
+          ],
+          "cohens_dz": -0.03550602299077637,
+          "t_p_value": 0.7842552110247707,
+          "wilcoxon_p_value": 0.5211472485278942
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.004236666666666663,
+          "mean_diff_ci95": [
+            -0.03383091666666666,
+            0.024993833333333337
+          ],
+          "p_lower": 0.1551726304819725,
+          "non_inferior": false
+        }
+      }
+    },
+    "abl_no_entropy": {
+      "n": 60,
+      "mean_rounds": 2.45,
+      "mean_operational_tokens": 25953.3,
+      "mean_final_is": 0.661,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 2.45,
+          "mean_reference": 6.0,
+          "mean_diff": -3.55,
+          "mean_diff_ci95": [
+            -3.7,
+            -3.3666666666666667
+          ],
+          "cohens_dz": -5.2623801003251325,
+          "t_p_value": 6.454802164428333e-45,
+          "wilcoxon_p_value": 2.969858051007262e-12
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 25953.266666666666,
+          "mean_reference": 11070.15,
+          "mean_diff": 14883.116666666667,
+          "mean_diff_ci95": [
+            13089.085416666667,
+            16907.43333333333
+          ],
+          "cohens_dz": 1.9189432119619367,
+          "t_p_value": 1.305806711458565e-21,
+          "wilcoxon_p_value": 1.629555794311934e-11
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6609599999999999,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.009229999999999995,
+          "mean_diff_ci95": [
+            -0.03917770833333332,
+            0.020751874999999996
+          ],
+          "cohens_dz": -0.07768379708452558,
+          "t_p_value": 0.5496551743442779,
+          "wilcoxon_p_value": 0.2665567549297021
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.009229999999999995,
+          "mean_diff_ci95": [
+            -0.03917770833333332,
+            0.020751874999999996
+          ],
+          "p_lower": 0.2426781850758878,
+          "non_inferior": false
+        }
+      }
+    },
+    "abl_no_isgain": {
+      "n": 60,
+      "mean_rounds": 3.917,
+      "mean_operational_tokens": 6862.9,
+      "mean_final_is": 0.6665,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 3.9166666666666665,
+          "mean_reference": 6.0,
+          "mean_diff": -2.0833333333333335,
+          "mean_diff_ci95": [
+            -2.35,
+            -1.7833333333333334
+          ],
+          "cohens_dz": -1.8285954541079301,
+          "t_p_value": 1.2174839705792953e-20,
+          "wilcoxon_p_value": 3.0197069384777844e-10
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 6862.866666666667,
+          "mean_reference": 11070.15,
+          "mean_diff": -4207.283333333334,
+          "mean_diff_ci95": [
+            -4799.984166666667,
+            -3577.2112500000003
+          ],
+          "cohens_dz": -1.7177436270766089,
+          "t_p_value": 2.0508064753745482e-19,
+          "wilcoxon_p_value": 3.552713678800501e-15
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6665199999999999,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.0036699999999999936,
+          "mean_diff_ci95": [
+            -0.033453916666666667,
+            0.025586791666666667
+          ],
+          "cohens_dz": -0.03099975501908247,
+          "t_p_value": 0.811067202840233,
+          "wilcoxon_p_value": 0.9797339246366477
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.0036699999999999936,
+          "mean_diff_ci95": [
+            -0.033453916666666667,
+            0.025586791666666667
+          ],
+          "p_lower": 0.1448349648935492,
+          "non_inferior": false
+        }
+      }
+    },
+    "critic_only": {
+      "n": 60,
+      "mean_rounds": 6.0,
+      "mean_operational_tokens": 11070.1,
+      "mean_final_is": 0.6702,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 6.0,
+          "mean_reference": 6.0,
+          "mean_diff": 0.0,
+          "mean_diff_ci95": [
+            0.0,
+            0.0
+          ],
+          "cohens_dz": 0.0,
+          "t_p_value": null,
+          "wilcoxon_p_value": null
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 11070.15,
+          "mean_reference": 11070.15,
+          "mean_diff": 0.0,
+          "mean_diff_ci95": [
+            0.0,
+            0.0
+          ],
+          "cohens_dz": 0.0,
+          "t_p_value": null,
+          "wilcoxon_p_value": null
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6701900000000001,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": 0.0,
+          "mean_diff_ci95": [
+            0.0,
+            0.0
+          ],
+          "cohens_dz": 0.0,
+          "t_p_value": null,
+          "wilcoxon_p_value": null
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": 0.0,
+          "mean_diff_ci95": [
+            0.0,
+            0.0
+          ],
+          "p_lower": null,
+          "non_inferior": true
+        }
+      }
+    },
+    "entropy_only": {
+      "n": 60,
+      "mean_rounds": 3.917,
+      "mean_operational_tokens": 6862.9,
+      "mean_final_is": 0.6665,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 3.9166666666666665,
+          "mean_reference": 6.0,
+          "mean_diff": -2.0833333333333335,
+          "mean_diff_ci95": [
+            -2.35,
+            -1.7833333333333334
+          ],
+          "cohens_dz": -1.8285954541079301,
+          "t_p_value": 1.2174839705792953e-20,
+          "wilcoxon_p_value": 3.0197069384777844e-10
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 6862.866666666667,
+          "mean_reference": 11070.15,
+          "mean_diff": -4207.283333333334,
+          "mean_diff_ci95": [
+            -4799.984166666667,
+            -3577.2112500000003
+          ],
+          "cohens_dz": -1.7177436270766089,
+          "t_p_value": 2.0508064753745482e-19,
+          "wilcoxon_p_value": 3.552713678800501e-15
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6665199999999999,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.0036699999999999936,
+          "mean_diff_ci95": [
+            -0.033453916666666667,
+            0.025586791666666667
+          ],
+          "cohens_dz": -0.03099975501908247,
+          "t_p_value": 0.811067202840233,
+          "wilcoxon_p_value": 0.9797339246366477
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.0036699999999999936,
+          "mean_diff_ci95": [
+            -0.033453916666666667,
+            0.025586791666666667
+          ],
+          "p_lower": 0.1448349648935492,
+          "non_inferior": false
+        }
+      }
+    },
+    "fixed_k1": {
+      "n": 60,
+      "mean_rounds": 1.0,
+      "mean_operational_tokens": 1568.3,
+      "mean_final_is": 0.6997,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 1.0,
+          "mean_reference": 6.0,
+          "mean_diff": -5.0,
+          "mean_diff_ci95": [
+            -5.0,
+            -5.0
+          ],
+          "cohens_dz": 0.0,
+          "t_p_value": null,
+          "wilcoxon_p_value": 9.485737571073747e-15
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 1568.3333333333333,
+          "mean_reference": 11070.15,
+          "mean_diff": -9501.816666666668,
+          "mean_diff_ci95": [
+            -10007.514583333334,
+            -9008.422916666666
+          ],
+          "cohens_dz": -4.770957500776311,
+          "t_p_value": 1.692953826970761e-42,
+          "wilcoxon_p_value": 1.629555794311934e-11
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6996699999999999,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": 0.02948,
+          "mean_diff_ci95": [
+            -0.013471875000000003,
+            0.06918583333333334
+          ],
+          "cohens_dz": 0.17867086598608584,
+          "t_p_value": 0.17157829695447094,
+          "wilcoxon_p_value": 0.07272405809793978
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": 0.02948,
+          "mean_diff_ci95": [
+            -0.013471875000000003,
+            0.06918583333333334
+          ],
+          "p_lower": 0.011825942840788195,
+          "non_inferior": true
+        }
+      }
+    },
+    "fixed_k3": {
+      "n": 60,
+      "mean_rounds": 3.0,
+      "mean_operational_tokens": 5179.1,
+      "mean_final_is": 0.6709,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 3.0,
+          "mean_reference": 6.0,
+          "mean_diff": -3.0,
+          "mean_diff_ci95": [
+            -3.0,
+            -3.0
+          ],
+          "cohens_dz": 0.0,
+          "t_p_value": null,
+          "wilcoxon_p_value": 9.485737571073747e-15
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 5179.133333333333,
+          "mean_reference": 11070.15,
+          "mean_diff": -5891.016666666666,
+          "mean_diff_ci95": [
+            -6230.341666666666,
+            -5562.374583333333
+          ],
+          "cohens_dz": -4.406402554978882,
+          "t_p_value": 1.499002408437335e-40,
+          "wilcoxon_p_value": 1.629555794311934e-11
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6709433333333333,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": 0.0007533333333333336,
+          "mean_diff_ci95": [
+            -0.03608329166666667,
+            0.039253208333333296
+          ],
+          "cohens_dz": 0.0049941614302434195,
+          "t_p_value": 0.9692724470262108,
+          "wilcoxon_p_value": 0.8922236085814943
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": 0.0007533333333333336,
+          "mean_diff_ci95": [
+            -0.03608329166666667,
+            0.039253208333333296
+          ],
+          "p_lower": 0.1454483813406242,
+          "non_inferior": false
+        }
+      }
+    },
+    "fixed_k6": {
+      "n": 60,
+      "mean_rounds": 6.0,
+      "mean_operational_tokens": 11070.1,
+      "mean_final_is": 0.6702
+    },
+    "oracle_is": {
+      "n": 60,
+      "mean_rounds": 2.733,
+      "mean_operational_tokens": 29848.7,
+      "mean_final_is": 0.7854,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 2.7333333333333334,
+          "mean_reference": 6.0,
+          "mean_diff": -3.2666666666666666,
+          "mean_diff_ci95": [
+            -3.683333333333333,
+            -2.8333333333333335
+          ],
+          "cohens_dz": -1.8927957553235277,
+          "t_p_value": 2.475955356764893e-21,
+          "wilcoxon_p_value": 1.062548687907407e-10
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 29848.716666666667,
+          "mean_reference": 11070.15,
+          "mean_diff": 18778.566666666666,
+          "mean_diff_ci95": [
+            13867.829583333332,
+            23978.506666666668
+          ],
+          "cohens_dz": 0.9269310275626919,
+          "t_p_value": 1.3410255954238525e-09,
+          "wilcoxon_p_value": 2.3680817959610836e-07
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.7853833333333333,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": 0.11519333333333333,
+          "mean_diff_ci95": [
+            0.08868987499999996,
+            0.14408070833333333
+          ],
+          "cohens_dz": 1.0450246621281598,
+          "t_p_value": 3.784513940607916e-11,
+          "wilcoxon_p_value": 5.145276051717655e-10
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": 0.11519333333333333,
+          "mean_diff_ci95": [
+            0.08868987499999996,
+            0.14408070833333333
+          ],
+          "p_lower": 8.471001677889944e-14,
+          "non_inferior": true
+        }
+      }
+    },
+    "random_s0": {
+      "n": 60,
+      "mean_rounds": 3.617,
+      "mean_operational_tokens": 6235.7,
+      "mean_final_is": 0.6948,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 3.6166666666666667,
+          "mean_reference": 6.0,
+          "mean_diff": -2.3833333333333333,
+          "mean_diff_ci95": [
+            -2.816666666666667,
+            -1.95
+          ],
+          "cohens_dz": -1.3870991136674597,
+          "t_p_value": 1.6297855414118082e-15,
+          "wilcoxon_p_value": 9.177964293635642e-10
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 6235.733333333334,
+          "mean_reference": 11070.15,
+          "mean_diff": -4834.416666666667,
+          "mean_diff_ci95": [
+            -5779.309583333334,
+            -3909.72
+          ],
+          "cohens_dz": -1.299452058890197,
+          "t_p_value": 2.0123482541969973e-14,
+          "wilcoxon_p_value": 3.552713678800501e-15
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6947766666666666,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": 0.02458666666666666,
+          "mean_diff_ci95": [
+            -0.0032324166666666617,
+            0.054200124999999995
+          ],
+          "cohens_dz": 0.21275181201428453,
+          "t_p_value": 0.10467507990301096,
+          "wilcoxon_p_value": 0.28725468913773966
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": 0.02458666666666666,
+          "mean_diff_ci95": [
+            -0.0032324166666666617,
+            0.054200124999999995
+          ],
+          "p_lower": 0.00204080479935298,
+          "non_inferior": true
+        }
+      }
+    },
+    "random_s1": {
+      "n": 60,
+      "mean_rounds": 3.567,
+      "mean_operational_tokens": 6408.2,
+      "mean_final_is": 0.6756,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 3.566666666666667,
+          "mean_reference": 6.0,
+          "mean_diff": -2.433333333333333,
+          "mean_diff_ci95": [
+            -2.8333333333333335,
+            -2.05
+          ],
+          "cohens_dz": -1.5644615975793341,
+          "t_p_value": 1.1896764969794218e-17,
+          "wilcoxon_p_value": 3.9966012640894297e-10
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 6408.233333333334,
+          "mean_reference": 11070.15,
+          "mean_diff": -4661.916666666667,
+          "mean_diff_ci95": [
+            -5452.926666666666,
+            -3893.162083333333
+          ],
+          "cohens_dz": -1.491464434695937,
+          "t_p_value": 8.762541985748796e-17,
+          "wilcoxon_p_value": 5.145276051717655e-10
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6755566666666666,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": 0.005366666666666675,
+          "mean_diff_ci95": [
+            -0.03194645833333332,
+            0.04099720833333334
+          ],
+          "cohens_dz": 0.036610596041073556,
+          "t_p_value": 0.7777216056805016,
+          "wilcoxon_p_value": 0.5021216997272653
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": 0.005366666666666675,
+          "mean_diff_ci95": [
+            -0.03194645833333332,
+            0.04099720833333334
+          ],
+          "p_lower": 0.09262371124444146,
+          "non_inferior": false
+        }
+      }
+    },
+    "random_s2": {
+      "n": 60,
+      "mean_rounds": 3.417,
+      "mean_operational_tokens": 5930.2,
+      "mean_final_is": 0.6645,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 3.4166666666666665,
+          "mean_reference": 6.0,
+          "mean_diff": -2.5833333333333335,
+          "mean_diff_ci95": [
+            -3.033333333333333,
+            -2.1333333333333333
+          ],
+          "cohens_dz": -1.4081050481228905,
+          "t_p_value": 8.99265979286525e-16,
+          "wilcoxon_p_value": 3.885793310852685e-10
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 5930.233333333334,
+          "mean_reference": 11070.15,
+          "mean_diff": -5139.916666666667,
+          "mean_diff_ci95": [
+            -6096.7404166666665,
+            -4182.682083333333
+          ],
+          "cohens_dz": -1.3373827335247972,
+          "t_p_value": 6.738931529058498e-15,
+          "wilcoxon_p_value": 5.145276051717655e-10
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6644816666666667,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.005708333333333329,
+          "mean_diff_ci95": [
+            -0.040449624999999996,
+            0.027582041666666657
+          ],
+          "cohens_dz": -0.04239971184564392,
+          "t_p_value": 0.7437518300806805,
+          "wilcoxon_p_value": 0.9449924875689604
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.005708333333333329,
+          "mean_diff_ci95": [
+            -0.040449624999999996,
+            0.027582041666666657
+          ],
+          "p_lower": 0.2071182923448206,
+          "non_inferior": false
+        }
+      }
+    },
+    "shp": {
+      "n": 60,
+      "mean_rounds": 2.4,
+      "mean_operational_tokens": 25363.2,
+      "mean_final_is": 0.666,
+      "vs_baseline": {
+        "rounds": {
+          "n": 60,
+          "mean_treatment": 2.4,
+          "mean_reference": 6.0,
+          "mean_diff": -3.6,
+          "mean_diff_ci95": [
+            -3.7333333333333334,
+            -3.45
+          ],
+          "cohens_dz": -6.446434808413906,
+          "t_p_value": 5.685573663558571e-50,
+          "wilcoxon_p_value": 2.7834412953416525e-12
+        },
+        "operational_tokens": {
+          "n": 60,
+          "mean_treatment": 25363.2,
+          "mean_reference": 11070.15,
+          "mean_diff": 14293.05,
+          "mean_diff_ci95": [
+            12776.609583333333,
+            15868.69125
+          ],
+          "cohens_dz": 2.2772163563596513,
+          "t_p_value": 3.344077495096306e-25,
+          "wilcoxon_p_value": 1.629555794311934e-11
+        },
+        "final_is": {
+          "n": 60,
+          "mean_treatment": 0.6659533333333332,
+          "mean_reference": 0.6701900000000001,
+          "mean_diff": -0.004236666666666663,
+          "mean_diff_ci95": [
+            -0.03383091666666666,
+            0.024993833333333337
+          ],
+          "cohens_dz": -0.03550602299077637,
+          "t_p_value": 0.7842552110247707,
+          "wilcoxon_p_value": 0.5211472485278942
+        },
+        "is_noninferiority_delta0.02": {
+          "n": 60,
+          "margin": 0.02,
+          "mean_diff": -0.004236666666666663,
+          "mean_diff_ci95": [
+            -0.03383091666666666,
+            0.024993833333333337
+          ],
+          "p_lower": 0.1551726304819725,
+          "non_inferior": false
+        }
+      }
+    }
+  }
+}

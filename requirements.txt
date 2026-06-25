@@ -1,0 +1,4 @@
+# Top-level convenience: install the backend dependencies.
+#   pip install -r requirements.txt
+# The canonical, annotated dependency list lives in backend/requirements.txt.
+-r backend/requirements.txt

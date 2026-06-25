@@ -22,15 +22,30 @@ ENV/
 # Local Model Weights Cache
 .hf_cache/
 
+# Logs
+*.log
+
 # Backend generated data (runtime outputs)
 backend/*.json
 backend/*.csv
 backend/doc/information_score_test_results.csv
 
-# Exceptions (keep essential project files)
+# Experiment artifacts: ignore bulky caches, keep report-critical outputs.
+backend/results/**/trajectories/
+backend/results/**/judge_cache/
+backend/results/**/rows.jsonl
+
+# Exceptions (keep essential project files + the small, version-worthy artifacts)
 !backend/test_scenarios.json
 !backend/requirements.txt
 !backend/.env.example
+!backend/data/                       # keep the data directory
+!backend/data/test_scenarios.json
+!backend/data/scenarios_*.json
+!backend/results/**/summary.csv
+!backend/results/**/summary.json
+!backend/results/**/config_snapshot.json
+!backend/results/**/figures/
 
 # Frontend
 frontend/node_modules/
@@ -42,3 +57,10 @@ frontend/.env.local
 *.csv
 !test_scenarios.json
 !requirements.txt
+
+# Final overrides (later rules win) — keep the version-worthy data + results artifacts.
+!backend/data/
+!backend/data/*.json
+!backend/results/**/summary.json
+!backend/results/**/summary.csv
+!backend/results/**/config_snapshot.json

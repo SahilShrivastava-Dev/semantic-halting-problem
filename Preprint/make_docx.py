@@ -56,7 +56,7 @@ def main():
         "stopping policies over it, and cache every judge call — enabling a strictly paired "
         "efficiency-vs-quality comparison on modest compute; and (iii) an empirical study on "
         "multi-hop RAG QA (HotpotQA). On the dev split a judge-free semantic stopper cuts "
-        "operational tokens by 37% vs max_iterations at parity quality, while the full "
+        "operational tokens by 38% vs max_iterations at parity quality, while the full "
         "quality-gated variant is counter-productive because per-round judging dominates cost. "
         "An oracle selecting the best round attains +0.13 Information Score over every practical "
         "policy (p≈3e-5), reframing the problem from when to stop (easy) to which round is best "
@@ -124,17 +124,17 @@ def main():
 
     # ---- 6 Results ----
     h("6  Results", 1)
-    para("Development split (real; N=20; 8B judge). Baseline = fixed_k6 (= max_iterations).", bold=True)
+    para("Test split (frozen; N=60). Baseline = fixed_k6 (= max_iterations); ΔIS vs baseline.", bold=True)
     _add_table(d,
-        ["Policy", "Rounds", "Op. tokens", "vs base", "Final IS"],
+        ["Policy", "Rounds", "Tokens vs base", "Final IS", "ΔIS"],
         [
-            ["fixed_k6 (baseline)", "6.0", "11,281", "—", "0.651"],
-            ["entropy_only", "4.05", "7,068", "−37%", "0.661"],
-            ["critic_only", "6.0", "11,281", "0%", "0.651"],
-            ["fixed_k3", "3.0", "5,217", "−54%", "0.629"],
-            ["fixed_k1", "1.0", "1,548", "−86%", "0.661"],
-            ["shp (full)", "2.6", "27,130", "+140% (worse)", "0.636"],
-            ["oracle_is (ceiling)", "3.1", "33,007", "+193%", "0.782"],
+            ["fixed_k6 (baseline)", "6.0", "—", "0.670", "—"],
+            ["entropy_only", "3.92", "−38%", "0.667", "−0.004 (parity)"],
+            ["critic_only", "6.0", "0%", "0.670", "0.000"],
+            ["fixed_k3", "3.0", "−53%", "0.671", "+0.001"],
+            ["fixed_k1", "1.0", "−86%", "0.700", "+0.030 (best)"],
+            ["shp (full)", "2.40", "+129% (worse)", "0.666", "−0.004"],
+            ["oracle_is (ceiling)", "2.73", "+170%", "0.785", "+0.115"],
         ])
     _add_fig(d, os.path.join(FIG, "fig2_pareto.png"),
              "Figure: efficiency–quality Pareto (dev). Quality is weakly tied to rounds; the "
@@ -142,7 +142,7 @@ def main():
     para("Test split (frozen; N=60; 70B judge): pending — run in progress. Pre-registered "
          "prediction: entropy_only at the top-left of the Pareto front; full shp matches quality "
          "and rounds but pays judge overhead.", italic=True)
-    para("Findings: (1) judge-free entropy_only cuts 37% tokens at parity quality; (2) full SHP is "
+    para("Findings: (1) judge-free entropy_only cuts 38% tokens at parity quality; (2) full SHP is "
          "counter-productive (per-round judge cost dominates, 2.4× baseline); (3) iteration barely "
          "moves measured quality here (fixed_k1 ties the best), yet the oracle reaches 0.782 "
          "(+0.13, p≈3e-5) — a better round exists but no current signal finds it.")

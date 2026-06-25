@@ -1,0 +1,14 @@
+{
+  "n_trajectories": 60,
+  "n_usable": 60,
+  "frac_monotone_nonincreasing": 0.05,
+  "mean_slope": -0.009222367547144363,
+  "slope_ci95": [
+    -0.013565484392823495,
+    -0.005018858426696471
+  ],
+  "wilcoxon_stat": 10727.0,
+  "wilcoxon_p_one_sided_decreasing": 0.001315454885965854,
+  "mean_step_diff": -0.009632903821058698,
+  "supports_conjecture": true
+}

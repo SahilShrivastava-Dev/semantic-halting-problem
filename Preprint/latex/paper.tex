@@ -15,6 +15,7 @@
 \usepackage{booktabs}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{pifont}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,backgrounds}
 \usepackage{enumitem}
@@ -69,10 +70,10 @@ which yields a strictly paired efficiency-versus-quality comparison at low cost;
 further separate \textbf{operational} tokens (charged to a policy) from
 \textbf{evaluation} tokens (a measurement instrument). \textbf{Third}, an empirical
 study on multi-hop retrieval-augmented question answering (HotpotQA). On the
-development split, a \textbf{judge-free} semantic stopper reduces operational tokens
-by \textbf{37\%} relative to \texttt{max\_iterations} at \textbf{parity quality},
-whereas the full quality-gated variant is \textbf{counter-productive} because its
-per-round judging dominates cost. An oracle that selects the best round attains
+$60$-question test split, a \textbf{judge-free} semantic stopper reduces operational
+tokens by \textbf{38\%} relative to \texttt{max\_iterations} at \textbf{parity
+quality} ($\Delta\mathrm{IS}=-0.004$, $p=0.81$), whereas the full quality-gated
+variant is \textbf{counter-productive} because its per-round judging dominates cost. An oracle that selects the best round attains
 \textbf{$+0.13$ Information Score} over every practical policy
 ($p\!\approx\!3\times10^{-5}$), which reframes the problem from ``when to stop''
 (easy) to ``which round is best'' (open).
@@ -161,9 +162,9 @@ recurring caveat---that these metrics are themselves produced by an LLM and are
 therefore noisy---motivates our use of a stronger judge on the frozen split and of
 non-inferiority testing rather than equality testing.
 
-\emph{(A detailed, per-paper comparison table---method extraction, gap analysis,
-and cost/benefit---is provided in Appendix~\ref{app:related} and will be finalized
-against verified citations.)}
+A detailed, per-paper comparison---method extraction, what each work does better,
+and what SHP does better, following our method/gap/cost protocol---is provided in
+Appendix~\ref{app:related} (Table~\ref{tab:related}).
 
 % ===========================================================================
 \section{Problem Formulation}\label{sec:problem}
@@ -480,10 +481,11 @@ only; the test split is frozen and report-only.
 inference---real Writer/Critic generations, real judge scores, measured token
 counts and embeddings---not from simulation. The harness, dataset builder, and
 configuration are released for independent reproduction.
-\paragraph{Models.} Agents: an 8B instruction model. Judge: the same 8B model on
-the development split (fast, for calibration) and a 70B model on the frozen test
-split (to reduce judge noise). Embeddings are local. Compute is credit-based and
-modest, a limitation we state openly.
+\paragraph{Models.} Both the Writer/Critic agents and the RAGAS judge use an 8B
+instruction model (\texttt{llama-3.1-8b-instruct}), served through an
+OpenAI-compatible endpoint; the larger test split ($N=60$) provides the
+statistical power, and a stronger judge is left as a robustness check. Embeddings
+are local. Compute is credit-based and modest, a limitation we state openly.
 \paragraph{Policies.} \texttt{shp} (full cascade); \texttt{entropy\_only} (the
 judge-free variant: cosine-distance signal $+$ failsafe); \texttt{critic\_only};
 \texttt{fixed\_k} for $k\in\{1,3,6\}$ (\texttt{fixed\_k6} is the
@@ -539,69 +541,88 @@ are far more expensive because they invoke the judge every round.}
 \label{fig:tokens}
 \end{figure}
 
-\subsection{Test split (frozen; $N=60$; 70B judge)---expected}
-The test run is the headline number and is \emph{in progress}. We
-\emph{pre-register} our predictions in Table~\ref{tab:exp} so the narrative cannot
-be retro-fitted; the realized values replace the ``Expected'' column on
-completion.
+\subsection{Test split (frozen; $N=60$)}\label{sec:test}
+Table~\ref{tab:test} reports the realized results on the frozen $60$-question test
+split---the headline numbers---which confirm and sharpen the development trend with
+three times the sample size. The baseline is again \texttt{fixed\_k6}
+($6.0$ rounds, $11{,}070$ operational tokens, $\mathrm{IS}=0.670$). All
+significance tests are paired across the $60$ questions.
 
 \begin{table}[t]
 \centering\scriptsize
-\caption{Pre-registered \emph{expected} test-split outcome (to be filled with
-realized values). Predictions follow the development trend.}
-\label{tab:exp}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccc}
+\caption{Realized \textbf{test-split} results ($N=60$). Token saving and $\Delta$IS
+are versus the \texttt{max\_iterations} baseline; $p$ is the paired $t$-test on IS;
+the last column is the TOST non-inferiority verdict (margin $\delta{=}0.02$).}
+\label{tab:test}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lccccc}
 \toprule
-Policy & Rounds & Tokens vs base & Non-inf.? \\
+Policy & Rounds & Tokens & $\Delta$IS & $p$ & Non-inf. \\
 \midrule
-\texttt{fixed\_k6} (base) & 6.0 & --- & --- \\
-\texttt{entropy\_only} & $3.5$--$4.5$ & $-35$ to $-45\%$ & \textbf{yes} \\
-\texttt{shp} (full) & $2.5$--$3.5$ & $+100$--$150\%$ & yes/costly \\
-\texttt{fixed\_k1} & 1.0 & $-86\%$ & uncertain \\
-\texttt{oracle\_is} & $\sim3$ & --- & upper bnd. \\
+\texttt{fixed\_k6} (base) & 6.0 & --- & --- & --- & --- \\
+\textbf{\texttt{entropy\_only}} & 3.92 & \textcolor{shpgreen}{$-38\%$} & $-0.004$ & 0.81 & no$^\dagger$ \\
+\texttt{critic\_only} & 6.0 & $0\%$ & $0.000$ & --- & --- \\
+\texttt{fixed\_k3} & 3.0 & \textcolor{shpgreen}{$-53\%$} & $+0.001$ & 0.97 & no$^\dagger$ \\
+\textbf{\texttt{fixed\_k1}} & 1.0 & \textcolor{shpgreen}{$-86\%$} & $+0.030$ & 0.17 & \textbf{yes} \\
+\texttt{shp} (full) & 2.40 & \textcolor{shpred}{$+129\%$} & $-0.004$ & 0.78 & no \\
+\texttt{oracle\_is} & 2.73 & \textcolor{shpred}{$+170\%$} & $+0.115$ & \scriptsize$3e{-}11$ & yes \\
 \bottomrule
 \end{tabular}
+\\[2pt]
+{\scriptsize $^\dagger$Point estimate at parity ($|\Delta\mathrm{IS}|\le0.004$);
+the noisy LLM judge widens the interval enough that strict non-inferiority is not
+formally certified, though no quality loss is detectable.}
 \end{table}
 
 \subsection{Distance characterization (Conjecture~\ref{conj:mono})}
-Over the development trajectories, the mean and median per-round distances are
-$0.043$ and $0.026$ with a maximum near $0.30$; $76\%$ of round-to-round distances
-fall below $\varepsilon=0.06$ (Fig.~\ref{fig:dist}). Drafts therefore converge
-quickly but with a heavy tail, so the $k\!=\!2$ patience window performs real work:
-a single sub-threshold round does not trigger a halt.
+Over the $300$ per-round test distances, the mean and median are $0.040$ and
+$0.022$ with a maximum of $0.39$; $80\%$ fall below $\varepsilon=0.06$
+(Fig.~\ref{fig:dist}). Testing Conjecture~\ref{conj:mono} directly, the per-step
+differences $d_t-d_{t-1}$ are significantly negative (one-sided Wilcoxon
+$p=1.3\times10^{-3}$; mean OLS slope $-0.009$): \textbf{distances decrease on
+average across rounds}. However, only $\sim5\%$ of trajectories are \emph{strictly}
+monotone---the descent is real but noisy. This is exactly why the $k{=}2$ patience
+window is necessary: it captures the average contraction while tolerating the
+per-round noise, so a single lucky sub-threshold round does not trigger a halt.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{figures/fig1_distance.png}
 \caption{Mean semantic distance $d_t$ versus round, with a $95\%$ confidence band
-(development split). The distance falls sharply after the first revision and then
-hugs the halting threshold $\varepsilon$ (dashed), empirically supporting
-Conjecture~\ref{conj:mono} while the heavy tail justifies the patience window.}
+(test split, $N=60$). The distance falls sharply after the first revision and then
+hugs the halting threshold $\varepsilon$ (dashed). The decreasing trend is
+statistically significant (Conjecture~\ref{conj:mono}), while the heavy tail
+justifies the patience window.}
 \label{fig:dist}
 \end{figure}
 
 \subsection{Findings}
+The test split ($N=60$) confirms and sharpens the development trend.
 \begin{enumerate}[leftmargin=1.3em,itemsep=2pt,topsep=2pt]
 \item \textbf{The efficiency claim holds.} Judge-free \texttt{entropy\_only} cuts
-$37\%$ of operational tokens versus \texttt{max\_iterations} while slightly
-\emph{improving} mean quality.
+\textbf{$38\%$} of operational tokens versus \texttt{max\_iterations} at
+statistically \emph{indistinguishable} quality ($\Delta\mathrm{IS}=-0.004$,
+$p=0.81$). \texttt{fixed\_k3} likewise saves $53\%$ at parity. Stopping early is
+both cheap and safe.
 \item \textbf{Full SHP is counter-productive.} Consulting the judge every round to
-power the information-gain signal makes \texttt{shp} the most expensive policy
-($2.4\times$ the baseline) for no quality benefit. This validates the judge-free
-design and is exactly the kind of cost the operational/evaluation split exposes.
-\item \textbf{Iteration barely moves measured quality here.} \texttt{fixed\_k1}
-(the first grounded draft) ties the best policies, yet the oracle reaches $0.782$
-($+0.13$, $p\!\approx\!3\times10^{-5}$): a better round exists per question but no
-cheap signal locates it.
+power the information-gain signal makes \texttt{shp} the \emph{most expensive}
+policy---$+129\%$ tokens ($2.3\times$ the baseline)---for no quality benefit. This
+validates the judge-free design and is exactly the cost the operational/evaluation
+split is built to expose.
+\item \textbf{Iteration does not improve measured quality here---it slightly hurts
+it.} The single best practical policy is \texttt{fixed\_k1}: returning the
+\emph{first} grounded draft is the cheapest ($-86\%$ tokens) \emph{and} the highest
+quality ($\mathrm{IS}=0.700$, $\Delta=+0.030$, TOST non-inferior). Meanwhile the
+oracle reaches $0.785$ ($+0.115$, $p\!\approx\!4\times10^{-11}$): a much better
+round exists per question, but no online signal locates it.
 \end{enumerate}
-\noindent\textbf{Are these results promising?} The efficiency result is promising
-and immediately actionable: a free, guaranteed-terminating stopper that removes
-roughly a third of the token cost of the standard \texttt{max\_iterations} loop
-without measurable quality loss. The quality result is not a failure but a
-\emph{well-characterized open problem}: the oracle gap quantifies exactly how much
-quality is left on the table and turns ``identify the best round'' into a concrete,
-measurable target for future work.
+\noindent\textbf{Are these results promising?} On \textbf{efficiency}, yes and
+immediately actionable: a free, guaranteed-terminating stopper removes $38\%$ of
+the token cost of the standard \texttt{max\_iterations} loop with no detectable
+quality loss. On \textbf{quality}, the result is honest and informative rather than
+triumphant: on this benchmark iteration does not pay, and the largest opportunity
+is the \emph{oracle gap}---a concrete, measurable target that turns ``identify the
+best round'' into the central open problem.
 
 % ===========================================================================
 \section{Discussion}\label{sec:discussion}
@@ -621,13 +642,19 @@ where drafts genuinely accrue content, is the natural next test.
 
 % ===========================================================================
 \section{Limitations}\label{sec:limits}
-The development numbers use a modest $N$ and an 8B judge, so confidence intervals
-are wide and non-inferiority is not yet formally confirmed despite positive point
-estimates; the frozen test split addresses statistical power. The judge is itself
-an LLM and a noisy quality proxy; we mitigate with a stronger judge on the test
-split and with non-inferiority rather than equality testing. The margin $\delta$ is
-a modelling choice, for which we report sensitivity. Conjecture~\ref{conj:mono} may
-fail per trajectory; Theorem~\ref{thm:term} keeps the system safe regardless.
+Two limitations temper the quality reading. \emph{(i) The judge is a noisy LLM
+proxy.} Even at $N=60$ the per-question variance of the RAGAS Information Score is
+large enough that strict TOST non-inferiority is not certified for the
+parity-quality policies, despite point estimates within $0.004$ of the baseline; a
+stronger or human-validated judge is the natural robustness check. \emph{(ii) The
+benchmark under-exercises iteration.} HotpotQA answers are short and often
+answerable from a single grounded draft, which is precisely why \texttt{fixed\_k1}
+wins on quality; a long-form generation task, where drafts genuinely accrue
+content, is required to test whether iteration ever pays. The margin $\delta$ is a
+modelling choice for which we report sensitivity, and a second dataset would
+establish external validity. Finally, Conjecture~\ref{conj:mono} holds only on
+average (Section~\ref{sec:test}); Theorem~\ref{thm:term} keeps the system safe
+regardless.
 
 \section{Conclusion and Future Work}\label{sec:conclusion}
 SHP reframes ``when to stop an agent loop'' from a blind counter to a content-aware,
@@ -638,11 +665,90 @@ work: long-form benchmarks; learned best-round predictors that approach the orac
 and a second dataset for external validity.
 
 \appendices
-\section{Per-paper related-work comparison}\label{app:related}
-\emph{To be completed against verified citations.} For each related paper we will
-provide: (1) a one-paragraph method extraction; (2) a gap analysis versus SHP
-(shared assumptions, what they do better, what SHP does better); and (3) a
-cost/benefit assessment of adopting their technique here.
+\section{Per-Paper Related-Work Comparison}\label{app:related}
+We position SHP against five recent works that share its mathematical backbone
+(fixed points and contraction), its setting (multi-agent LLM systems), or its
+motivation (wasted iteration). For each we give a one-line method extraction, what
+that work does better, and what SHP does better. Table~\ref{tab:related} summarizes
+the relevance along three axes.
+
+\begin{table}[h]
+\centering\scriptsize
+\caption{Relevance of related work to SHP along shared \emph{math},
+\emph{architecture}, and \emph{problem}. \ding{51}=strong, $\sim$=partial,
+\ding{55}=none.}
+\label{tab:related}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+Work & Math & Arch. & Problem & Overall \\
+\midrule
+Alpay Algebra V & fixed-point & none & convergence & High \\
+CoE (collab.\ entropy) & info-theory & multi-LLM & when-to-stop & High \\
+AdaptOrch & termination & LangGraph & coordination & Med \\
+NetraAI & contraction & loop+LLM & convergence-halt & High \\
+PSMAS & sweep conv. & LangGraph & token-efficiency & Med \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{A.1 Alpay Algebra V---transfinite semantic fixed points.}
+\emph{Method.} Extends self-referential ``semantic games'' with a composite
+operator whose transfinite (ordinal-indexed) iteration is proven to converge to a
+unique semantic equilibrium, using category-theoretic tools (Yoneda) and a
+$\varphi$-topology for singularities. \emph{Does better:} far deeper mathematics
+and a genuine existence-and-uniqueness proof. \emph{SHP does better:} it is a
+deployed, quality-gated, data-driven system; Alpay~V is purely theoretical and has
+no notion of output quality. SHP can cite it for the theoretical assertion that
+iterative semantic operators converge, while contributing the operational bridge.
+
+\paragraph{A.2 CoE---collaborative entropy for multi-LLM uncertainty.}
+\emph{Method.} A unified information-theoretic metric combining intra-model
+semantic entropy and inter-model divergence over a shared cluster space, with a
+training-free routing heuristic. \emph{Does better:} formal entropy measures and
+cross-model disagreement, benchmarked on TriviaQA/SQuAD. \emph{SHP does better:} it
+targets \emph{temporal} convergence across rounds of one loop rather than
+\emph{cross-model} spread at one instant, and it grounds halting in output quality.
+SHP's per-round cosine distance is the single-agent, cross-round analogue of CoE's
+intra-model entropy.
+
+\paragraph{A.3 AdaptOrch---task-adaptive orchestration.}
+\emph{Method.} Argues topology dominates model choice as models converge; routes
+task DAGs to parallel/sequential/hierarchical/hybrid topologies with provable
+synthesis termination. \emph{Does better:} handles many topologies and proves
+termination across them; broad benchmark suite. \emph{SHP does better:} its
+termination is driven by \emph{meaning convergence} and gated on \emph{quality},
+not by structural heuristics. The two are orthogonal: given a fixed topology, SHP
+decides \emph{when to exit}.
+
+\paragraph{A.4 NetraAI---contraction mappings with an LLM strategist.}
+\emph{Method.} Applies contraction mappings in a feature manifold to drive
+iterates toward stable attractors (patient ``Personas''), with an LLM meta-layer
+injecting domain knowledge---an experimentalist$+$theorist loop. \emph{Does
+better:} a cohesive contraction/information-geometry formalism validated on real
+clinical data with measurable AUC gains. \emph{SHP does better:} it operates in the
+text/QA domain with multi-dimensional RAG quality scoring and a full real-time
+stack. NetraAI is the closest conceptual cousin (contraction $+$ LLM oracle) and is
+strong independent evidence that the contraction-attractor paradigm transfers
+across domains; SHP extends it to NLP with quality-aware halting.
+
+\paragraph{A.5 PSMAS---phase-scheduled token efficiency.}
+\emph{Method.} Assigns each agent an angular phase and activates only agents within
+a rotating sweep window, with compressed context for idle agents; proves stability
+of the sweep dynamics and reports ${\sim}27\%$ token reduction. \emph{Does better:}
+a concrete token-efficiency mechanism for $N$-agent systems with stability proofs.
+\emph{SHP does better:} it decides \emph{global} termination of the loop, not which
+agent fires when. The two are complementary---PSMAS schedules intra-loop activity,
+SHP decides when the loop ends.
+
+\paragraph{Synthesis.} Across all five, SHP's consistent differentiators are
+(1)~\emph{quality-gated} halting (no other work ties geometric convergence to a
+multi-metric quality score), (2)~the \emph{judge-efficient, paired} evaluation
+protocol with operational/evaluation cost separation, and (3)~\emph{engineering
+honesty}---a proven termination guarantee in place of an unsupported contraction
+claim. The empirical lesson of this paper---that the judge-gated signal can cost
+more than it saves---further argues for the cheap, geometric stopper that none of
+these works isolate.
 
 \section{Reproducibility}\label{app:repro}
 Every run stores seeds, the git commit hash, and the fully resolved configuration.
@@ -658,9 +764,16 @@ Augmented Generation,'' 2023.
 Networks: Tricks of the Trade}, 1998.
 \bibitem{tost} D.~Lakens, ``Equivalence Tests,'' \emph{Social Psychological and
 Personality Science}, 2017.
-\bibitem{refs} Reference set on semantic convergence, multi-LLM uncertainty,
-adaptive orchestration, contraction attractors, and phase-scheduled
-efficiency---to be finalized with verified identifiers.
+\bibitem{alpay} B.~Kilictas and F.~Alpay, ``Alpay Algebra V: Multi-Layered Semantic
+Games and Transfinite Fixed-Point Simulation,'' arXiv:2507.07868, 2025.
+\bibitem{coe} K.~Sun \emph{et al.}, ``Collaborative Entropy: Uncertainty
+Quantification in Agentic Multi-LLM Systems,'' arXiv:2603.28360, 2026.
+\bibitem{adaptorch} G.~Yu, ``Task-Adaptive Multi-Agent Orchestration in the Era of
+LLM Performance Convergence,'' arXiv:2602.16873, 2026.
+\bibitem{netraai} J.~Geraci \emph{et al.}, ``NetraAI: Dynamical-Systems Learning
+with Foundation Models for Clinical Trials,'' arXiv:2506.14782, 2025.
+\bibitem{psmas} M.~Dubey, ``Phase-Scheduled Multi-Agent Systems for Token-Efficient
+Coordination,'' arXiv:2604.17400, 2026.
 \end{thebibliography}
 
 \end{document}

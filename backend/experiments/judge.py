@@ -58,9 +58,10 @@ class RagasJudge:
         self.ragas_llm = get_ragas_llm(provider, eval_model)
         self.embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
         self.metrics = [Faithfulness(), AnswerRelevancy(), ContextPrecision(), ContextRecall()]
-        # Groq free tier 429s with any parallelism → 1. NVIDIA build tolerates
-        # higher concurrency, so parallelise the 4 metrics. OpenAI → 2.
-        n_workers = {"groq": RAGAS_MAX_WORKERS, "nvidia": 4}.get(provider, min(2, RAGAS_MAX_WORKERS + 1))
+        # Groq free tier 429s with any parallelism → 1. NVIDIA build also rate-limits,
+        # so keep modest concurrency (2) and rely on the SDK's 429 backoff (max_retries
+        # set on the model in providers.py). OpenAI → 2.
+        n_workers = {"groq": RAGAS_MAX_WORKERS}.get(provider, 2)
         self.run_config = (
             _RagasRunConfig(max_workers=n_workers, timeout=RAGAS_EVAL_TIMEOUT)
             if _HAS_RUN_CONFIG else None

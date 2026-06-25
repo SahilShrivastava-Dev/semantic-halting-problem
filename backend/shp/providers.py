@@ -176,6 +176,7 @@ def get_llm(
             max_tokens=max_tokens,
             api_key=api_key,
             base_url=NVIDIA_BASE_URL,
+            max_retries=8,   # SDK rides out 429s with exponential backoff
         )
 
     raise ValueError(f"Unknown provider '{provider}'.")
@@ -217,6 +218,7 @@ def get_ragas_llm(provider: str, model: str) -> LangchainLLMWrapper:
             max_tokens=EVAL_LLM_MAX_TOKENS,
             api_key=api_key,
             base_url=NVIDIA_BASE_URL,
+            max_retries=8,   # absorb judge-side 429s with backoff
         ))
 
     raise ValueError(f"Unknown provider '{provider}'.")

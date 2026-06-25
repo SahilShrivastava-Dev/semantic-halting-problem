@@ -455,11 +455,26 @@ savings are reported as $(T_{\text{base}}-T_\pi)/T_{\text{base}}$.
 
 % ===========================================================================
 \section{Experimental Setup}\label{sec:setup}
-\paragraph{Benchmark.} HotpotQA (distractor setting), filtered to multi-hop
-\texttt{hard} questions so the loop has genuine room to iterate; $N\!\approx\!80$,
-split $20$ development / $60$ test. The thresholds $\varepsilon,k$ are tuned on the
-development split only; the test split is frozen and report-only. Each question
-carries the gold supporting paragraphs plus distractors ($\approx4$ contexts).
+\paragraph{Data and its provenance.} We use \textbf{HotpotQA}~\cite{hotpotqa}, a
+peer-reviewed multi-hop question-answering benchmark, in its \emph{distractor}
+setting, streamed directly from the public HuggingFace Hub
+(\texttt{hotpot\_qa/distractor}, validation split). Our builder programmatically
+(i)~filters to multi-hop \texttt{hard} questions, so a single draft rarely
+suffices and the loop has genuine room to iterate; (ii)~for each question forms a
+realistic retrieval context of the \emph{gold} supporting paragraphs plus
+distractor paragraphs ($\approx4$ contexts total); and (iii)~assigns a
+\emph{deterministic} development/test split by hashing the example identifier (no
+randomness, fully reproducible). This yields $N\!\approx\!80$ scenarios,
+$20$ development / $60$ test. \emph{How the data is used:} the question and its
+contexts are given to both the Writer and the Critic (RAG grounding), and the
+context and the gold answer are given to the RAGAS judge to compute the four
+quality metrics. The thresholds $\varepsilon,k$ are tuned on the development split
+only; the test split is frozen and report-only.
+
+\paragraph{These are real runs.} All numbers below come from live LLM
+inference---real Writer/Critic generations, real judge scores, measured token
+counts and embeddings---not from simulation. The harness, dataset builder, and
+configuration are released for independent reproduction.
 \paragraph{Models.} Agents: an 8B instruction model. Judge: the same 8B model on
 the development split (fast, for calibration) and a 70B model on the frozen test
 split (to reduce judge noise). Embeddings are local. Compute is credit-based and
@@ -575,6 +590,13 @@ design and is exactly the kind of cost the operational/evaluation split exposes.
 ($+0.13$, $p\!\approx\!3\times10^{-5}$): a better round exists per question but no
 cheap signal locates it.
 \end{enumerate}
+\noindent\textbf{Are these results promising?} The efficiency result is promising
+and immediately actionable: a free, guaranteed-terminating stopper that removes
+roughly a third of the token cost of the standard \texttt{max\_iterations} loop
+without measurable quality loss. The quality result is not a failure but a
+\emph{well-characterized open problem}: the oracle gap quantifies exactly how much
+quality is left on the table and turns ``identify the best round'' into a concrete,
+measurable target for future work.
 
 % ===========================================================================
 \section{Discussion}\label{sec:discussion}

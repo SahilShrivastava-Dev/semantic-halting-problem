@@ -1,0 +1,336 @@
+\documentclass[10pt]{article}
+
+% ---- Packages -------------------------------------------------------------
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+
+\captionsetup{font=small,labelfont=bf}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{conjecture}{Conjecture}
+
+\definecolor{shpblue}{HTML}{1F77B4}
+\definecolor{shpgreen}{HTML}{2CA02C}
+\definecolor{shpred}{HTML}{D62728}
+
+% ---- Title ----------------------------------------------------------------
+\title{\textbf{Semantic Early-Stopping for Iterative LLM Agent Loops:\\
+A Judge-Efficient Study of \emph{When to Halt}}}
+\author{Sahil Shrivastava\\
+\texttt{semantic-halting-problem}\\
+\small Working draft --- theory claims machine-checked; empirical results from the open harness.}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Iterative multi-agent LLM loops---e.g.\ a Writer that drafts and a Critic that
+revises---are typically terminated by a fixed iteration cap (\texttt{max\_iterations}).
+This \emph{syntactic} kill-switch is blind to whether the answer is still
+improving: it over-spends on easy inputs and truncates hard ones. We study
+\textbf{semantic early-stopping}: halting when consecutive draft embeddings stop
+changing in meaning (cosine-distance patience) and the answer's measured quality
+plateaus. We contribute (i)~an \emph{honest} theoretical footing---a proof of
+deterministic termination and well-definedness, with the convergence of the
+distance sequence treated as an empirically tested \emph{conjecture} rather than a
+(previously over-claimed) Banach contraction; (ii)~a \textbf{judge-efficient
+evaluation protocol}---generate each trajectory once, replay all stopping policies
+over it, and cache every LLM-judge call---enabling a strictly paired
+efficiency-versus-quality comparison on modest compute; and (iii)~an empirical
+study on multi-hop RAG question answering (HotpotQA). On the development split a
+\emph{judge-free} semantic stopper reduces operational tokens by $37\%$ relative
+to \texttt{max\_iterations} at parity quality, while the full quality-gated
+variant is \emph{counter-productive} because its per-round judging dominates cost.
+An oracle that selects the best round attains $+0.13$ Information Score over every
+practical policy ($p\!\approx\!3\times10^{-5}$), reframing the open problem from
+\emph{when to stop} (easy) to \emph{which round is best} (unsolved).
+\end{abstract}
+
+% ===========================================================================
+\section{Introduction}
+A widely used agentic pattern is the \textbf{Writer$\rightarrow$Critic loop}: a
+Writer produces an answer, a Critic critiques it, the Writer revises, and the
+cycle repeats. A termination rule is required. The default---stop after $N$
+rounds---is wasteful in two directions. \emph{Over-iteration:} easy questions
+converge in one or two rounds yet the loop spends tokens and latency until $N$.
+\emph{Under-iteration:} hard questions may need more than $N$ and are cut off.
+Crucially, a counter cannot perceive that rounds $4$, $5$, and $6$ all said
+essentially the same thing: the decision is made on iteration index, not content.
+
+We map each draft to an embedding and measure the cosine distance between
+consecutive drafts. When that distance stays below a threshold $\varepsilon$ for
+$k$ consecutive rounds, the answer has converged in meaning, and we halt. We pair
+this geometric signal with a quality signal (an Information Score over RAG
+metrics), so the loop halts only when the answer has both stopped changing and
+stopped improving, with critic approval and a hard failsafe as additional
+conditions.
+
+\paragraph{Contributions.}
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt,topsep=2pt]
+\item \textbf{Honest theory} (\S\ref{sec:theory}): deterministic termination,
+well-definedness, and halt-priority consistency are \emph{proven and
+machine-checked}; semantic non-expansiveness is a \emph{measured conjecture}.
+\item \textbf{Judge-efficient evaluation protocol} (\S\ref{sec:setup}):
+trajectory replay $+$ cached judging $+$ an explicit
+\emph{operational-versus-evaluation} token model.
+\item \textbf{Empirical study} (\S\ref{sec:results}) on HotpotQA against five
+baselines with paired significance and non-inferiority testing.
+\end{enumerate}
+
+% ===========================================================================
+\section{Related Work and Novelty}
+Semantic convergence and termination of agent loops have been studied from
+fixed-point theory, multi-LLM uncertainty, adaptive orchestration, contraction
+mappings in feature manifolds, and token-efficient scheduling. SHP differs in
+\emph{what} it decides (when to exit a fixed sequential loop, by content) and in
+its honesty (it proves termination but refuses the unsupported contraction
+guarantee).
+
+\paragraph{Is this unique?} The \emph{ingredients}---early stopping, early-exit
+inference, embedding similarity---are individually established. What is, to our
+knowledge, not done together is: (1)~\emph{quality-gated} semantic halting for
+agent loops; (2)~a judge-efficient, strictly-paired \emph{evaluation protocol}
+that makes ``which halt policy is best'' cheaply measurable; and (3)~an
+\emph{operational-versus-evaluation} token accounting that charges a policy for
+its own measurement overhead. Contributions (2)--(3) are reusable beyond SHP and
+constitute the defensible novelty: a methodology, not a new mathematical object.
+
+% ===========================================================================
+\section{Method}
+\subsection{Architecture}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  node distance=8mm and 14mm,
+  box/.style={draw,rounded corners,align=center,minimum height=8mm,font=\small,fill=blue!4},
+  dec/.style={draw,diamond,aspect=2,align=center,font=\small,fill=orange!10,inner sep=1pt},
+  >=Latex]
+\node[box] (q) {Question \\ $+$ contexts};
+\node[box,right=of q] (w) {Writer\\LLM};
+\node[box,right=of w] (e) {Embed\\$e_t$};
+\node[dec,right=18mm of e] (h) {Halt\\cascade};
+\node[box,below=10mm of e] (j) {RAGAS judge\\$\mathrm{IS}_t$};
+\node[box,below=10mm of w] (c) {Critic\\LLM};
+\node[box,right=14mm of h] (out) {Final answer\\$+$ reason};
+\draw[->] (q)--(w);
+\draw[->] (w)--node[above,font=\scriptsize]{$x_t$}(e);
+\draw[->] (e)--node[above,font=\scriptsize]{$d_t$}(h);
+\draw[->] (w.south)--(j.north);
+\draw[->] (j.east)-|(h.south);
+\draw[->] (h.south)|-(c.east) node[pos=0.75,below,font=\scriptsize]{continue};
+\draw[->] (c.west)-|(w.south) node[pos=0.25,below,font=\scriptsize]{feedback};
+\draw[->] (h)--node[above,font=\scriptsize]{halt}(out);
+\end{tikzpicture}
+\caption{SHP architecture. Embeddings are local (free); only the judge costs API tokens.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Signals}
+For drafts $x_1,\dots,x_T$ with embeddings $e_t=\phi(x_t)$,
+\[
+d_t = 1-\cos(e_t,e_{t-1})\in[0,2],\qquad
+\mathrm{IS}_t=\sum_{m\in\mathcal M} w_m\,\mathrm{RAGAS}_m(x_t)\in[0,1],
+\]
+with $\mathcal M=\{$faithfulness, answer relevancy, context precision, context
+recall$\}$ and weights $w$ on the simplex.
+
+\subsection{The halt cascade}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  node distance=6mm and 10mm,
+  dec/.style={draw,diamond,aspect=2.4,align=center,font=\scriptsize,fill=orange!10,inner sep=0pt,minimum width=22mm},
+  halt/.style={draw,rounded corners,align=center,font=\scriptsize,fill=green!8},
+  >=Latex]
+\node[dec] (a) {Critic\\APPROVED?};
+\node[dec,right=20mm of a] (b) {$d_t<\varepsilon$ for $k$?};
+\node[dec,right=20mm of b] (cc) {$\Delta \mathrm{IS}\le0$?};
+\node[dec,right=20mm of cc] (d) {$t\ge T_{\max}$?};
+\node[halt,below=6mm of a] (h1) {critic\_approved};
+\node[halt,below=6mm of b] (h2) {entropy\_conv.};
+\node[halt,below=6mm of cc] (h3) {no\_info\_gain};
+\node[halt,below=6mm of d] (h4) {failsafe};
+\node[draw,rounded corners,right=12mm of d,font=\scriptsize,fill=blue!4] (cont) {continue};
+\draw[->] (a)--node[above,font=\scriptsize]{no}(b);
+\draw[->] (b)--node[above,font=\scriptsize]{no}(cc);
+\draw[->] (cc)--node[above,font=\scriptsize]{no}(d);
+\draw[->] (d)--node[above,font=\scriptsize]{no}(cont);
+\draw[->] (a)--node[right,font=\scriptsize]{yes}(h1);
+\draw[->] (b)--node[right,font=\scriptsize]{yes}(h2);
+\draw[->] (cc)--node[right,font=\scriptsize]{yes}(h3);
+\draw[->] (d)--node[right,font=\scriptsize]{yes}(h4);
+\end{tikzpicture}
+\caption{Priority-ordered halt cascade. One shared implementation drives the live
+loop, the post-hoc reason, and offline replay (Lemma~\ref{lem:consistency}).}
+\label{fig:cascade}
+\end{figure}
+
+% ===========================================================================
+\section{Theory (Honest)}\label{sec:theory}
+We do \emph{not} claim a Banach contraction: LLM generation has no proven
+Lipschitz constant $<1$ and is non-deterministic across calls. We prove only what
+holds; each proven claim is machine-checked in the released code.
+
+\begin{theorem}[Termination]
+For any input, weights, and signal configuration, the loop halts in at most
+$T_{\max}$ rounds.
+\end{theorem}
+\begin{proof}[Proof sketch]
+The Critic increments the round counter by one per round; the failsafe clause is
+unconditional and not ablatable, returning \texttt{failsafe} whenever
+$t\ge T_{\max}$. Hence the stopping time $\tau\le T_{\max}$.
+\end{proof}
+
+\begin{lemma}[Well-definedness]
+$\mathrm{IS}_t\in[0,1]$ (convex combination of $[0,1]$ metrics on the simplex);
+$d_t$ is total and bounded in $[0,2]$, with the zero-norm case mapped
+conservatively to $1.0$.
+\end{lemma}
+
+\begin{lemma}[Halt-priority consistency]\label{lem:consistency}
+The post-hoc halt reason equals the live decision, because both invoke a single
+shared cascade function.
+\end{lemma}
+
+\begin{conjecture}[Semantic non-expansiveness; empirical]
+The distance sequence $d_t$ tends to decrease in $t$. We \emph{measure} the
+fraction of monotone trajectories, the mean regression slope (95\% CI), and a
+one-sided Wilcoxon test---reporting null results where they occur.
+\end{conjecture}
+
+% ===========================================================================
+\section{Experimental Setup}\label{sec:setup}
+\paragraph{Benchmark.} HotpotQA (distractor), filtered to multi-hop \texttt{hard}
+questions so the loop has room to iterate; $N\!\approx\!80$, split 20 dev / 60
+test; $\varepsilon,k$ tuned on dev only, test frozen; $\approx4$ contexts/question
+(gold $+$ distractors).
+\paragraph{Models.} Agents: \texttt{llama-3.1-8b-instruct}; judge: 8B on dev,
+70B on the frozen test split. Served via an OpenAI-compatible endpoint;
+embeddings local. Compute is credit-based and modest---a stated limitation.
+\paragraph{Protocol.} Each question's full trajectory is generated \emph{once};
+every halt policy replays over the identical drafts (strictly paired); the judge
+runs at most once per distinct draft. \textbf{Operational} tokens (charged to a
+policy) include the judge \emph{only if the policy needs it to run};
+\textbf{evaluation} tokens are a measurement instrument and are not charged.
+\paragraph{Policies.} \texttt{shp} (full cascade), \texttt{entropy\_only}
+(judge-free), \texttt{critic\_only}, \texttt{fixed\_k}$\in\{1,3,6\}$
+(\texttt{fixed\_k6} $=$ \texttt{max\_iterations}), \texttt{random\_stop},
+\texttt{oracle\_is} (quality upper bound).
+\paragraph{Statistics.} Paired $t$-test, Wilcoxon, Cohen's $d_z$, bootstrap CIs,
+TOST non-inferiority on IS (margin $\delta$), Holm correction.
+
+% ===========================================================================
+\section{Results}\label{sec:results}
+
+\subsection{Development split (real; $N=20$; 8B judge)}
+Table~\ref{tab:dev} reports the real development-split outcome. The baseline is
+\texttt{fixed\_k6} (the \texttt{max\_iterations} policy).
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Policy & Rounds & Op.\ tokens & Tokens vs base & Final IS \\
+\midrule
+\texttt{fixed\_k6} (baseline) & 6.0 & 11{,}281 & --- & 0.651 \\
+\textbf{\texttt{entropy\_only}} & 4.05 & \textbf{7{,}068} & \textbf{$-37\%$} & \textbf{0.661} \\
+\texttt{critic\_only} & 6.0 & 11{,}281 & $0\%$ & 0.651 \\
+\texttt{fixed\_k3} & 3.0 & 5{,}217 & $-54\%$ & 0.629 \\
+\texttt{fixed\_k1} & 1.0 & \textbf{1{,}548} & $-86\%$ & 0.661 \\
+\textbf{\texttt{shp} (full)} & 2.6 & \textbf{27{,}130} & \textcolor{shpred}{\textbf{$+140\%$}} & 0.636 \\
+\texttt{oracle\_is} (ceiling) & 3.1 & 33{,}007 & $+193\%$ & \textbf{0.782} \\
+\bottomrule
+\end{tabular}
+\caption{Development-split results. \texttt{entropy\_only} saves $37\%$ tokens at
+parity quality; full \texttt{shp} is the most expensive policy for no quality
+gain; the oracle's $+0.13$ IS over all practical policies ($p\!\approx\!3e{-}5$)
+shows large unrealised headroom. $N=20$ with an 8B judge is underpowered:
+non-inferiority is not yet formally confirmed despite positive point estimates.}
+\label{tab:dev}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}{0.49\textwidth}\centering
+\includegraphics[width=\linewidth]{figures/fig2_pareto.png}
+\caption{Efficiency--quality Pareto (dev).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.49\textwidth}\centering
+\includegraphics[width=\linewidth]{figures/fig1_distance.png}
+\caption{Mean cosine distance vs round.}
+\end{subfigure}
+\caption{Left: quality is weakly tied to rounds; the oracle sits far above the
+practical policies. Right: distances fall quickly (median $0.026$) with a heavy
+tail, so the $k{=}2$ patience window does real work.}
+\label{fig:results}
+\end{figure}
+
+\subsection{Test split (frozen; $N=60$; 70B judge)}
+\emph{Pending---run in progress.} Pre-registered prediction:
+\texttt{entropy\_only} sits at the top-left of the Pareto front (few rounds,
+near-baseline quality, no judge cost); full \texttt{shp} matches its quality and
+rounds but pays judge overhead. The frozen-split numbers replace this paragraph.
+
+\subsection{Findings}
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt,topsep=2pt]
+\item \textbf{Efficiency holds.} Judge-free \texttt{entropy\_only} cuts $37\%$ of
+tokens versus \texttt{max\_iterations} while slightly improving mean quality.
+\item \textbf{Full SHP is counter-productive.} Running the judge every round to
+power the information-gain signal makes it the most expensive policy
+($2.4\times$ baseline) for no quality benefit---validating the judge-free design.
+\item \textbf{Iteration barely moves measured quality here}: \texttt{fixed\_k1}
+ties the best policies, yet the oracle reaches $0.782$. A better round exists per
+question but no current signal locates it.
+\end{enumerate}
+
+% ===========================================================================
+\section{Analysis}
+The data separate a \emph{solved} efficiency problem from an \emph{unsolved}
+quality problem. Stopping early is cheap and safe (judge-free entropy, guaranteed
+termination). But the oracle gap ($+0.13$ IS, $p\!\approx\!3e{-}5$) shows that
+cosine distance and IS-gain do not reliably locate the best draft: ``when to stop
+\emph{for efficiency}'' is easy; ``which round is \emph{best}'' is the real open
+question this study surfaces. A benchmark caveat: HotpotQA answers are short and
+often answerable from one grounded draft, under-exercising iterative \emph{quality}
+gains; a long-form task is the right next test.
+
+% ===========================================================================
+\section{Limitations}
+Modest $N$ on credit-based compute; an LLM judge is a noisy proxy (mitigated by a
+stronger judge on the frozen split and non-inferiority rather than equality
+testing); $\delta$ is a modelling choice with reported sensitivity;
+Conjecture~1 may fail per-trajectory, but Theorem~1 guarantees safety regardless.
+
+\section{Conclusion}
+SHP reframes ``when to stop an agent loop'' from a blind counter to a
+content-aware, quality-gated decision backed by an honest termination guarantee
+and a reusable, judge-efficient evaluation protocol. Its judge-free variant saves
+tokens at parity quality; its oracle gap names the valuable open problem of
+best-round identification.
+
+\paragraph{Reproducibility.} Seeds, git SHA, and resolved config are stored per
+run; proven claims are checked by \texttt{python -m shp.theory\_checks}.
+
+\bibliographystyle{plainnat}
+\begin{thebibliography}{9}\small
+\bibitem{hotpotqa} Z.\ Yang et al. HotpotQA: A Dataset for Diverse, Explainable Multi-hop QA. \emph{EMNLP}, 2018.
+\bibitem{ragas} S.\ Es et al. RAGAS: Automated Evaluation of Retrieval Augmented Generation. 2023.
+\bibitem{refs} Reference set (fixed-point convergence; multi-LLM entropy; adaptive orchestration; contraction attractors; phase-scheduled efficiency)---arXiv IDs to verify before camera-ready.
+\end{thebibliography}
+
+\end{document}

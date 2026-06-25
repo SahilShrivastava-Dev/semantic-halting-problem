@@ -1,0 +1,8 @@
+ablation,n,mean_rounds,mean_tokens,mean_IS
+abl_critic_only,20,6.0,11281.0,0.6509
+abl_entropy_only,20,4.05,7068.5,0.6609
+abl_full,20,2.6,27129.9,0.6355
+abl_isgain_only,20,2.75,28846.0,0.6263
+abl_no_critic,20,2.6,27129.9,0.6355
+abl_no_entropy,20,2.75,28846.0,0.6263
+abl_no_isgain,20,4.05,7068.5,0.6609

@@ -1,0 +1,4 @@
+claim,status
+Theorem 1: termination ≤ MAX_ROUNDS,PASS
+"Lemma 1a: IS ∈ [0,1]",PASS
+Lemma 1c: distance total & bounded,PASS

@@ -193,37 +193,45 @@ $\tau=\min\{t:H(s_t)\neq\textsf{continue}\}$.
 % ===========================================================================
 \section{Method}\label{sec:method}
 
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
-\resizebox{0.96\textwidth}{!}{%
-\begin{tikzpicture}[
-  node distance=10mm and 18mm,
-  box/.style={draw,rounded corners,align=center,minimum height=9mm,font=\small,fill=blue!4},
-  dec/.style={draw,diamond,aspect=2,align=center,font=\small,fill=orange!12,inner sep=1pt},
-  >=Latex,thick]
-\node[box] (q) {Question $q$\\$+$ contexts $C$};
-\node[box,right=of q] (w) {\textbf{Writer} LLM\\(RAG-grounded)};
-\node[box,right=of w] (e) {Embed\\$e_t=\phi(x_t)$};
-\node[box,below=10mm of e] (j) {RAGAS judge\\$\mathrm{IS}_t$ (Eq.~\ref{eq:is})};
-\node[dec,right=20mm of e] (h) {Halt\\cascade $H$};
-\node[box,below=10mm of w] (c) {\textbf{Critic} LLM\\(RAG-grounded)};
-\node[box,right=18mm of h] (out) {Final answer\\$+$ halt reason};
+\begin{tikzpicture}[>=Latex,thick,
+  box/.style={draw,rounded corners,align=center,font=\small,text width=22mm,
+              minimum height=8mm,inner sep=3pt,fill=blue!4},
+  agent/.style={box,fill=blue!10},
+  dec/.style={draw,diamond,aspect=2,align=center,font=\small,fill=orange!14,inner sep=1pt},
+  fin/.style={box,fill=green!14},
+  lbl/.style={font=\scriptsize,fill=white,inner sep=1pt}]
+\node[box] (q) at (0,0) {Question $q$ \,+\, contexts $C$};
+\node[agent] (w) at (0,-1.7) {\textbf{Writer} LLM};
+\node[box] (e) at (-2.4,-3.5) {Embed $\to d_t$};
+\node[box] (j) at (2.4,-3.5) {Judge $\to \mathrm{IS}_t$};
+\node[dec] (h) at (0,-5.2) {Halt $H$};
+\node[fin] (fin) at (-2.4,-7.0) {Final answer};
+\node[agent] (c) at (2.4,-7.0) {\textbf{Critic} LLM};
 \draw[->] (q)--(w);
-\draw[->] (w)--node[above,font=\scriptsize]{draft $x_t$}(e);
-\draw[->] (e)--node[above,font=\scriptsize]{$d_t$ (Eq.~\ref{eq:dist})}(h);
-\draw[->] (w.south)--(j.north);
-\draw[->] (j.east)-|(h.south);
-\draw[->] (h.south)|-(c.east) node[pos=0.72,below,font=\scriptsize]{continue};
-\draw[->] (c.west)-|(w.south) node[pos=0.25,below,font=\scriptsize]{feedback};
-\draw[->] (h)--node[above,font=\scriptsize]{halt}(out);
-\end{tikzpicture}}
-\caption{SHP architecture. The Writer and Critic both condition on the retrieved
-contexts (a genuine RAG setting). Embeddings are computed by a local model and are
-therefore \emph{free}; only the RAGAS judge consumes API tokens. The halt cascade
-$H$ reads the cheap geometric signal $d_t$, the critic verdict, and---only when
-required---the quality signal $\mathrm{IS}_t$.}
+\draw[->] (w.south) to[out=-150,in=90] (e.north);
+\draw[->] (w.south) to[out=-30,in=90] (j.north);
+\draw[->] (e.south) to[out=-90,in=160] (h.west);
+\draw[->] (j.south) to[out=-90,in=20] (h.east);
+\draw[->] (h.west) to[out=200,in=90] (fin.north);
+\draw[->] (h.east) to[out=-20,in=90] (c.north);
+\draw[->] (c.east) -- ++(0.85,0) |- (w.east);
+\node[lbl] at (-1.55,-2.55) {$x_t$};
+\node[lbl] at ( 1.55,-2.55) {$x_t$};
+\node[lbl] at (-1.5,-6.1) {halt};
+\node[lbl] at ( 1.55,-6.1) {continue};
+\node[lbl] at ( 3.75,-4.3) {feedback};
+\end{tikzpicture}
+\caption{SHP architecture. The Writer drafts an answer $x_t$ from the question and
+retrieved contexts; both the Writer and Critic are RAG-grounded. Each draft is
+(left) embedded to yield the free geometric signal $d_t$ and (right) scored by the
+RAGAS judge to yield $\mathrm{IS}_t$. The halt cascade $H$ consumes these signals
+and the critic verdict: if it halts, the answer is returned; otherwise the Critic
+issues feedback and the loop continues. Embeddings are local (free); only the
+judge consumes API tokens.}
 \label{fig:arch}
-\end{figure*}
+\end{figure}
 
 \subsection{Two grounded agents}
 Both agents are conditioned on the retrieved contexts. This is not cosmetic: in an
@@ -245,9 +253,12 @@ The four signals are evaluated in a fixed priority order
 (Fig.~\ref{fig:cascade}). Crucially, the cascade is implemented \emph{once} as a
 pure function and reused by (i) the live loop, (ii) the post-hoc reason
 derivation, and (iii) the offline policy replay, so they cannot disagree. Listing
-\ref{lst:halt} shows the core.
+\ref{lst:halt} shows the core; note that the final \texttt{failsafe} clause is
+unconditional---it is governed by no signal flag---which is precisely what makes
+the termination guarantee (Theorem~\ref{thm:term}) hold.
 
-\begin{lstlisting}[style=py,caption={The single shared halt decision (simplified). The failsafe is unconditional, which is what makes Theorem~\ref{thm:term} hold.},label={lst:halt}]
+\medskip
+\begin{lstlisting}[style=py,aboveskip=10pt,belowskip=4pt,caption={The single shared halt decision (simplified).},label={lst:halt}]
 def shp_should_halt(t, dist_hist, is_hist,
                     feedback, cfg):
     if not dist_hist:                 # round 1
@@ -311,6 +322,40 @@ termination.}
 \State \Return $x_t,\ \text{halt\_reason}$
 \end{algorithmic}
 \end{algorithm}
+
+\subsection{A worked example}\label{sec:worked}
+Table~\ref{tab:worked} traces one real question from our data through the loop.
+The answer changes substantially in early rounds (the semantic distance is large
+and the quality rises), then stabilizes: by round~3 the distance has fallen below
+$\varepsilon$, and a second consecutive sub-threshold round at round~4 triggers the
+entropy halt. The \texttt{max\_iterations} baseline would have run all six rounds;
+SHP stops at round~4, saving a third of the work while the quality is already at
+its plateau. This single trace captures the whole thesis: \emph{the loop earns its
+keep early and idles late, and a content signal can tell the difference}.
+
+\begin{table}[t]
+\centering\small
+\caption{A real trajectory for the question \emph{``Are both Cypress and Ajuga
+genera?''} (ground truth: \emph{no}). $d_t$ is the semantic distance to the
+previous draft; $\mathrm{IS}_t$ is the quality score. SHP halts at round~4
+(entropy: two consecutive $d_t<\varepsilon{=}0.06$); the baseline runs to 6.}
+\label{tab:worked}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{ccccl}
+\toprule
+Round & Words & $d_t$ & $\mathrm{IS}_t$ & Decision \\
+\midrule
+1 & 16  & ---   & 0.54 & continue \\
+2 & 82  & 0.144 & 0.62 & continue (large change) \\
+3 & 110 & 0.027 & 0.64 & continue ($1^{\text{st}}$ sub-$\varepsilon$) \\
+4 & 162 & \textbf{0.007} & 0.62 & \textbf{HALT (entropy, $k{=}2$)} \\
+\midrule
+\multicolumn{5}{l}{\footnotesize(baseline would continue:)} \\
+5 & 177 & 0.003 & 0.66 & \emph{wasted under baseline} \\
+6 & --- & ---   & ---  & \emph{wasted under baseline} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Engineering challenges and how we overcame them}\label{sec:challenges}
 A faithful account of the work includes what broke and how it was fixed; these are
@@ -464,6 +509,16 @@ tied to rounds; the oracle sits far above every practical policy, and full
 \label{fig:pareto}
 \end{figure}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig3_tokens.png}
+\caption{Operational tokens saved versus the \texttt{max\_iterations} baseline
+(development split; positive is cheaper). The judge-free \texttt{entropy\_only} and
+the fixed-budget policies save tokens, whereas the full \texttt{shp} and the oracle
+are far more expensive because they invoke the judge every round.}
+\label{fig:tokens}
+\end{figure}
+
 \subsection{Test split (frozen; $N=60$; 70B judge)---expected}
 The test run is the headline number and is \emph{in progress}. We
 \emph{pre-register} our predictions in Table~\ref{tab:exp} so the narrative cannot
@@ -492,9 +547,19 @@ Policy & Rounds & Tokens vs base & Non-inf.? \\
 \subsection{Distance characterization (Conjecture~\ref{conj:mono})}
 Over the development trajectories, the mean and median per-round distances are
 $0.043$ and $0.026$ with a maximum near $0.30$; $76\%$ of round-to-round distances
-fall below $\varepsilon=0.06$. Drafts therefore converge quickly but with a heavy
-tail, so the $k\!=\!2$ patience window performs real work: a single sub-threshold
-round does not trigger a halt.
+fall below $\varepsilon=0.06$ (Fig.~\ref{fig:dist}). Drafts therefore converge
+quickly but with a heavy tail, so the $k\!=\!2$ patience window performs real work:
+a single sub-threshold round does not trigger a halt.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig1_distance.png}
+\caption{Mean semantic distance $d_t$ versus round, with a $95\%$ confidence band
+(development split). The distance falls sharply after the first revision and then
+hugs the halting threshold $\varepsilon$ (dashed), empirically supporting
+Conjecture~\ref{conj:mono} while the heavy tail justifies the patience window.}
+\label{fig:dist}
+\end{figure}
 
 \subsection{Findings}
 \begin{enumerate}[leftmargin=1.3em,itemsep=2pt,topsep=2pt]

@@ -47,30 +47,31 @@ Open implementation, machine-checked theory, reproducible harness\\
 \maketitle
 
 \begin{abstract}
-Multi-agent large language model (LLM) loops---for example a \emph{Writer} that
-drafts and a \emph{Critic} that revises---are almost always terminated by a fixed
+Multi-agent large language model (LLM) loops---for example a \textbf{Writer} that
+drafts and a \textbf{Critic} that revises---are almost always terminated by a fixed
 iteration cap (\texttt{max\_iterations}). This is a \emph{syntactic} kill-switch:
 it is blind to whether the answer is still improving, so it over-spends tokens on
-easy inputs and truncates hard ones. We study \emph{semantic early-stopping}: the
+easy inputs and truncates hard ones. We study \textbf{semantic early-stopping}: the
 loop halts when consecutive draft embeddings stop changing in meaning
 (cosine-distance with a patience window) and the answer's measured quality stops
-improving. Our work makes three contributions. First, an \emph{honest} theoretical
-footing: we prove deterministic termination and well-definedness and we
-\emph{machine-check} these claims, while treating the convergence of the distance
-sequence as an empirically tested conjecture rather than a (previously
-over-claimed) Banach contraction. Second, a \emph{judge-efficient evaluation
-protocol}: we generate each question's full trajectory once, replay every stopping
-policy over the identical drafts, and cache every LLM-judge call, which yields a
-strictly paired efficiency-versus-quality comparison at low cost; we further
-separate \emph{operational} tokens (charged to a policy) from \emph{evaluation}
-tokens (a measurement instrument). Third, an empirical study on multi-hop
-retrieval-augmented question answering (HotpotQA). On the development split, a
-\emph{judge-free} semantic stopper reduces operational tokens by $37\%$ relative to
-\texttt{max\_iterations} at parity quality, whereas the full quality-gated variant
-is \emph{counter-productive} because its per-round judging dominates cost. An
-oracle that selects the best round attains $+0.13$ Information Score over every
-practical policy ($p\!\approx\!3\times10^{-5}$), which reframes the problem from
-``when to stop'' (easy) to ``which round is best'' (open).
+improving. Our work makes three contributions. \textbf{First}, an \textbf{honest
+theoretical footing}: we prove deterministic termination and well-definedness and
+we \emph{machine-check} these claims, while treating the convergence of the
+distance sequence as an empirically tested conjecture rather than a (previously
+over-claimed) Banach contraction. \textbf{Second}, a \textbf{judge-efficient
+evaluation protocol}: we generate each question's full trajectory once, replay
+every stopping policy over the identical drafts, and cache every LLM-judge call,
+which yields a strictly paired efficiency-versus-quality comparison at low cost; we
+further separate \textbf{operational} tokens (charged to a policy) from
+\textbf{evaluation} tokens (a measurement instrument). \textbf{Third}, an empirical
+study on multi-hop retrieval-augmented question answering (HotpotQA). On the
+development split, a \textbf{judge-free} semantic stopper reduces operational tokens
+by \textbf{37\%} relative to \texttt{max\_iterations} at \textbf{parity quality},
+whereas the full quality-gated variant is \textbf{counter-productive} because its
+per-round judging dominates cost. An oracle that selects the best round attains
+\textbf{$+0.13$ Information Score} over every practical policy
+($p\!\approx\!3\times10^{-5}$), which reframes the problem from ``when to stop''
+(easy) to ``which round is best'' (open).
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -97,15 +98,15 @@ before the answer is finished. Worst of all, an integer counter is fundamentally
 expressed essentially the same thing. The stopping decision is made on the
 \emph{iteration index}, never on \emph{what was actually written}.
 
-\paragraph{The idea.} We replace the counter with a \emph{content-aware} rule. We
-map each draft to a sentence embedding and measure the cosine distance between
-consecutive drafts. When that distance stays below a small threshold $\varepsilon$
-for $k$ consecutive rounds, the answer has \emph{converged in meaning}; additional
-iteration is churn, and we halt. Because a fast convergence is not the same as a
-\emph{good} convergence, we pair this geometric signal with a quality signal---an
-Information Score (IS) computed from retrieval-augmented generation (RAG)
-metrics---so the loop only halts when the answer has both stopped \emph{changing}
-and stopped \emph{improving}. Two further conditions, an explicit critic approval
+\paragraph{The idea.} We replace the counter with a \textbf{content-aware} rule. We
+map each draft to a sentence embedding and measure the \textbf{cosine distance}
+between consecutive drafts. When that distance stays below a small threshold
+$\varepsilon$ for $k$ consecutive rounds, the answer has \textbf{converged in
+meaning}; additional iteration is churn, and we halt. Because a fast convergence is
+not the same as a \emph{good} convergence, we pair this geometric signal with a
+quality signal---an \textbf{Information Score} (IS) computed from
+retrieval-augmented generation (RAG) metrics---so the loop only halts when the
+answer has both stopped \textbf{changing} and stopped \textbf{improving}. Two further conditions, an explicit critic approval
 and a hard failsafe, complete a four-level priority cascade.
 
 \paragraph{The honest story behind this paper.} An earlier version of this project
@@ -600,11 +601,11 @@ measurable target for future work.
 
 % ===========================================================================
 \section{Discussion}\label{sec:discussion}
-The results separate a \emph{solved} problem from an \emph{open} one. Stopping
-early for \emph{efficiency} is easy and safe: the free entropy signal saves tokens
-and the failsafe guarantees termination. Stopping at the \emph{best} round for
-\emph{quality} is unsolved: the oracle gap shows substantial unrealized headroom
-that neither cosine distance nor information gain captures. We therefore reframe
+The results separate a \textbf{solved} problem from an \textbf{open} one. Stopping
+early for \textbf{efficiency} is easy and safe: the free entropy signal saves
+tokens and the failsafe guarantees termination. Stopping at the \textbf{best round}
+for \textbf{quality} is unsolved: the oracle gap shows substantial unrealized
+headroom that neither cosine distance nor information gain captures. We therefore reframe
 SHP's lasting contribution as (a) a guaranteed-terminating, judge-free stopper that
 saves tokens at parity quality, and (b) an evaluation protocol and an oracle target
 that make \emph{best-round identification} measurable for future work.

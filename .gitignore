@@ -64,3 +64,6 @@ frontend/.env.local
 !backend/results/**/summary.json
 !backend/results/**/summary.csv
 !backend/results/**/config_snapshot.json
+# Preprint build artifacts (regenerable; keep source .tex only)
+Preprint/latex/dist/
+Preprint/SHP.zip
